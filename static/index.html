@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Network Monitor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="logo-dot"></div>
+        <span class="topbar-title">Network Monitor</span>
+      </div>
+      <div class="topbar-right">
+        <div class="status-pill">
+          <div class="pulse"></div>
+          <span class="status-text">API running</span>
+        </div>
+        <div class="model-pill">
+          <span class="model-text">Ollama</span>
+          <span class="model-divider">|</span>
+          <span class="model-name">llama3.2</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN LAYOUT -->
+    <div class="main">
+
+      <!-- LEFT PANEL -->
+      <div class="left-panel">
+
+        <!-- ADD HOST CARD -->
+        <div class="glass-card">
+          <div class="card-header">Add host</div>
+          <label class="input-label">IP address or domain</label>
+          <input
+            class="input-field"
+            id="host-input"
+            type="text"
+            placeholder="192.168.1.1 or google.com"
+          />
+          <label class="input-label">Scan ports</label>
+          <div class="port-tags" id="port-tags"></div>
+          <button class="btn-add" id="btn-add-host">Add host</button>
+          <div class="error-msg" id="add-error"></div>
+        </div>
+
+        <!-- MONITORED HOSTS CARD -->
+        <div class="glass-card">
+          <div class="card-header">Monitored hosts</div>
+          <div class="host-list" id="host-list">
+            <div class="empty-state">No hosts added yet</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right-panel">
+
+        <!-- METRICS ROW -->
+        <div class="metrics-row">
+          <div class="metric-card">
+            <div class="metric-label">Ports scanned</div>
+            <div class="metric-value val-total" id="metric-total">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Open ports</div>
+            <div class="metric-value val-open" id="metric-open">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Closed ports</div>
+            <div class="metric-value val-closed" id="metric-closed">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Hosts monitored</div>
+            <div class="metric-value val-hosts" id="metric-hosts">0</div>
+          </div>
+        </div>
+
+        <!-- SCAN RESULTS CARD -->
+        <div class="glass-card">
+          <div class="results-header">
+            <span class="section-title">Scan results</span>
+          </div>
+          <div class="port-grid" id="port-grid">
+            <div class="empty-state">Run a scan to see results</div>
+          </div>
+          <span class="host-tag" id="scan-host-label"></span>
+        </div>
+
+        <!-- AI DIAGNOSTIC CARD -->
+        <div class="glass-card">
+          <div class="ai-header">
+            <span class="section-title">AI diagnostic</span>
+            <div class="ai-badge">
+              <span class="ai-badge-by">powered by</span>
+              <span class="ai-badge-model">ollama / llama3.2</span>
+            </div>
+          </div>
+          <div class="ai-body" id="ai-body">
+            Run a scan then click Analyze to get a diagnostic summary.
+          </div>
+          <div class="ai-rec" id="ai-rec" style="display:none;">
+            <div class="ai-rec-label">Recommended action</div>
+            <div class="ai-rec-text" id="ai-rec-text"></div>
+          </div>
+        </div>
+
+        <!-- ACTIVITY LOG CARD -->
+        <div class="glass-card">
+          <div class="section-title">Activity log</div>
+          <div class="log-entries" id="log-entries">
+            <div class="empty-state">No activity yet</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
