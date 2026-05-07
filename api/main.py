@@ -10,7 +10,9 @@ from pydantic import BaseModel
 from api.config import MAX_REQUEST_SIZE, SCAN_PORTS
 from api.logger import logger
 from api.scanner import scan_host, is_blacklisted
-from api.analyzer import analyze_scan
+from api.analyzer import analyze_scan, analyze_dns
+from api.ping import ping_host
+from api.dns_lookup import run_dns_lookup
 from fastapi.staticfiles import StaticFiles
 
 # --- App Setup ---
@@ -48,13 +50,11 @@ class HostInput(BaseModel):
 
 # --- Input Validation ---
 def is_valid_host(host: str) -> bool:
-    # Check valid IP
     try:
         socket.inet_aton(host)
         return True
     except socket.error:
         pass
-    # Check valid domain
     pattern = r"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$"
     return re.match(pattern, host) is not None
 
@@ -86,7 +86,13 @@ def add_host(data: HostInput):
     if any(h["host"] == host for h in hosts):
         raise HTTPException(status_code=409, detail="Host already exists")
 
-    entry = {"id": str(uuid.uuid4())[:8], "host": host, "ports": data.ports, "last_scan": None}
+    entry = {
+        "id": str(uuid.uuid4())[:8],
+        "host": host,
+        "ports": data.ports,
+        "last_scan": None,
+        "last_ping": None
+    }
     hosts.append(entry)
     logger.info(f"Host added: {host}")
     return {"message": "Host added", "entry": entry}
@@ -115,6 +121,18 @@ def scan(host_id: str, request: Request):
                 raise HTTPException(status_code=403, detail=str(e))
     raise HTTPException(status_code=404, detail="Host not found")
 
+
+@app.get("/hosts/{host_id}/ping")
+@limiter.limit("10/minute")
+def ping(host_id: str, request: Request):
+    for h in hosts:
+        if h["id"] == host_id:
+            result = ping_host(h["host"])
+            h["last_ping"] = result
+            return result
+    raise HTTPException(status_code=404, detail="Host not found")
+
+
 @app.post("/hosts/{host_id}/analyze")
 @limiter.limit("5/minute")
 async def analyze(host_id: str, request: Request):
@@ -125,6 +143,21 @@ async def analyze(host_id: str, request: Request):
                     status_code=400,
                     detail="Run a scan first before analyzing"
                 )
-            result = await analyze_scan(h["last_scan"])
+            result = await analyze_scan(h["last_scan"], h.get("last_ping"))
             return {"host": h["host"], "analysis": result}
     raise HTTPException(status_code=404, detail="Host not found")
+
+
+@app.get("/dns/lookup")
+@limiter.limit("10/minute")
+async def dns_lookup(target: str, request: Request):
+    result = run_dns_lookup(target)
+    return result
+
+
+@app.post("/dns/analyze")
+@limiter.limit("5/minute")
+async def dns_analyze(request: Request):
+    body = await request.json()
+    result = await analyze_dns(body["dns_result"])
+    return {"analysis": result}

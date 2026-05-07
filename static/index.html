@@ -14,8 +14,14 @@
     <div class="topbar">
       <div class="topbar-left">
         <div class="logo-dot"></div>
-        <span class="topbar-title">Network Monitor</span>
+        <span class="topbar-title">DOOF Network Monitor</span>
       </div>
+
+      <div class="topbar-nav">
+        <a href="index.html" class="nav-link active">Monitor</a>
+        <a href="dns_lookup/dns.html" class="nav-link">DNS Lookup</a>
+      </div>
+
       <div class="topbar-right">
         <div class="status-pill">
           <div class="pulse"></div>
@@ -83,6 +89,12 @@
             <div class="metric-value val-hosts" id="metric-hosts">0</div>
           </div>
         </div>
+
+        <!-- PING RESULT CARD -->
+      <div class="glass-card" id="ping-result" style="display:none;">
+        <div class="section-title">Ping result</div>
+        <div id="ping-body"></div>
+      </div>
 
         <!-- SCAN RESULTS CARD -->
         <div class="glass-card">

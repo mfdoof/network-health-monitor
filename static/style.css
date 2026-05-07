@@ -107,7 +107,7 @@ body {
 .main {
   padding: 28px 32px;
   display: grid;
-  grid-template-columns: 420px 1fr;
+  grid-template-columns: 520px 1fr;
   gap: 20px;
   align-items: start;
 }
@@ -260,7 +260,10 @@ body {
   color: #5F5E5A;
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s;
+  flex-shrink: 0;
+  min-width: 28px;
 }
+
 
 .btn-remove:hover {
   border-color: rgba(226, 75, 74, 0.5);
@@ -290,12 +293,15 @@ body {
   border: 0.5px solid rgba(62, 55, 69, 0.6);
   border-radius: 10px;
   padding: 12px 16px;
+  gap: 12px;
 }
 
 .host-info {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+  flex: 1;
 }
 
 .host-dot {
@@ -313,11 +319,17 @@ body {
   font-family: 'Courier New', monospace;
   font-size: 15px;
   color: #D3D1C7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
 }
+
 
 .host-actions {
   display: flex;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 /* METRICS */
@@ -564,4 +576,164 @@ body {
   color: #7F77DD;
   font-family: Arial, sans-serif;
   padding: 10px 0;
+}
+
+/* PING RESULT */
+.ping-row {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.ping-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+
+.ping-label {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ping-up   { color: #5DCAA5; }
+.ping-down { color: #E24B4A; }
+
+.ping-key {
+  font-size: 12px;
+  color: #5F5E5A;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ping-val {
+  font-family: 'Courier New', monospace;
+  font-size: 15px;
+  color: #CECBF6;
+}
+
+.ping-loss {
+  color: #E24B4A;
+}
+
+.ping-host-label {
+  color: #5DCAA5;
+}
+
+/* PING BUTTON */
+.btn-ping {
+  background: rgba(133, 79, 11, 0.2);
+  border: 0.5px solid rgba(200, 130, 40, 0.35);
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  color: #D4A04A;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-ping:hover {
+  background: rgba(133, 79, 11, 0.35);
+}
+
+.topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-link {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #5F5E5A;
+  text-decoration: none;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.nav-link:hover { color: #AFA9EC; }
+.nav-link.active { color: #7F77DD; }
+
+
+/* DNS LAYOUT */
+.dns-single {
+  display: flex;
+  flex-direction: column;
+  padding: 28px 32px;
+  gap: 18px;
+}
+
+/* DNS RESULTS */
+.dns-target {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: #5DCAA5;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 0.5px solid rgba(62, 55, 69, 0.5);
+}
+
+.dns-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 0.5px solid rgba(62, 55, 69, 0.3);
+}
+
+.dns-key {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #7F77DD;
+  letter-spacing: 0.1em;
+  min-width: 40px;
+}
+
+.dns-val {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: #CECBF6;
+  flex: 1;
+}
+
+.dns-pref {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  color: #5F5E5A;
+  margin-left: 8px;
+}
+
+.dns-ttl {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #444441;
+}
+
+.dns-row-error {
+  border-bottom: none;
+}
+
+.dns-key-err {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #D4A04A;
+  letter-spacing: 0.1em;
+  min-width: 40px;
+}
+
+.dns-val-err {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #888780;
+  flex: 1;
 }

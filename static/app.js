@@ -83,20 +83,22 @@ function renderHostRow(entry) {
   row.dataset.id = entry.id;
 
   row.innerHTML = `
-    <div class="host-info">
-      <div class="host-dot dot-unknown" id="dot-${entry.id}"></div>
-      <span class="host-name">${entry.host}</span>
-    </div>
-    <div class="host-actions">
-      <button class="btn-scan"    data-id="${entry.id}">Scan</button>
-      <button class="btn-analyze" data-id="${entry.id}">Analyze</button>
-      <button class="btn-remove"  data-id="${entry.id}">✕</button>
-    </div>
-  `;
+  <div class="host-info">
+    <div class="host-dot dot-unknown" id="dot-${entry.id}"></div>
+    <span class="host-name">${entry.host}</span>
+  </div>
+  <div class="host-actions">
+    <button class="btn-ping"    data-id="${entry.id}">Ping</button>
+    <button class="btn-scan"    data-id="${entry.id}">Scan</button>
+    <button class="btn-analyze" data-id="${entry.id}">Analyze</button>
+    <button class="btn-remove"  data-id="${entry.id}">✕</button>
+  </div>
+`;
 
-  row.querySelector('.btn-scan').addEventListener('click', () => scanHost(entry.id, entry.host));
-  row.querySelector('.btn-analyze').addEventListener('click', () => analyzeHost(entry.id, entry.host));
-  row.querySelector('.btn-remove').addEventListener('click', () => removeHost(entry.id, row));
+row.querySelector('.btn-ping').addEventListener('click', () => pingHost(entry.id, entry.host));
+row.querySelector('.btn-scan').addEventListener('click', () => scanHost(entry.id, entry.host));
+row.querySelector('.btn-analyze').addEventListener('click', () => analyzeHost(entry.id, entry.host));
+row.querySelector('.btn-remove').addEventListener('click', () => removeHost(entry.id, row));
 
   return row;
 }
@@ -262,6 +264,66 @@ async function analyzeHost(id, host) {
   } catch (err) {
     aiBody.textContent = 'Could not connect to API';
     addLog('ERROR', `Analyze error: ${host}`);
+  }
+}
+
+// --- PING HOST ---
+async function pingHost(id, host) {
+  addLog('INFO', `Ping started: ${host}`);
+
+  const pingCard = document.getElementById('ping-result');
+  pingCard.style.display = 'block';
+  document.getElementById('ping-body').innerHTML = `
+    <div class="loading">Pinging ${host}...</div>
+  `;
+
+  try {
+    const res  = await fetch(`${API}/hosts/${id}/ping`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      document.getElementById('ping-body').innerHTML = `
+        <div class="empty-state">Ping failed: ${data.detail}</div>
+      `;
+      addLog('ERROR', `Ping failed: ${host} — ${data.detail}`);
+      return;
+    }
+
+    const reachable = data.reachable;
+    const statusText = reachable ? 'Reachable' : 'Unreachable';
+    const latency = data.latency_ms !== null ? `${data.latency_ms} ms` : '—';
+
+    document.getElementById('ping-body').innerHTML = `
+      <div class="ping-row">
+        <div class="ping-stat">
+          <span class="ping-label ${reachable ? 'ping-up' : 'ping-down'}">${statusText}</span>
+        </div>
+        <div class="ping-stat">
+          <span class="ping-key">Latency</span>
+          <span class="ping-val">${latency}</span>
+        </div>
+        <div class="ping-stat">
+          <span class="ping-key">Packets</span>
+          <span class="ping-val">${data.packets_received} / ${data.packets_sent}</span>
+        </div>
+        <div class="ping-stat">
+          <span class="ping-key">Packet loss</span>
+          <span class="ping-val ${data.packet_loss_percent > 0 ? 'ping-loss' : ''}">${data.packet_loss_percent}%</span>
+        </div>
+        <div class="ping-stat">
+          <span class="ping-key">Host</span>
+          <span class="ping-val ping-host-label">${data.host}</span>
+        </div>
+      </div>
+    `;
+
+    addLog('INFO', `Ping complete: ${host} | reachable=${reachable} | latency=${latency} | loss=${data.packet_loss_percent}%`);
+
+  } catch (err) {
+    document.getElementById('ping-body').innerHTML = `
+      <div class="empty-state">Could not connect to API</div>
+    `;
+    addLog('ERROR', `Ping error: ${host}`);
   }
 }
 
