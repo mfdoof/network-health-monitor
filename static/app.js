@@ -1,4 +1,4 @@
-const API = 'http://localhost:8000';
+const API = 'https://doof.quest';
 
 const portDescriptions = {
   22: 'SSH', 80: 'HTTP', 443: 'HTTPS', 3389: 'RDP', 8080: 'HTTP-ALT'
