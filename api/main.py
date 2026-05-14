@@ -1,7 +1,7 @@
 import uuid
 import re
 import socket
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -13,20 +13,17 @@ from api.scanner import scan_host, is_blacklisted
 from api.analyzer import analyze_scan, analyze_dns
 from api.ping import ping_host
 from api.dns_lookup import run_dns_lookup
-from fastapi.staticfiles import StaticFiles
 
 # --- App Setup ---
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="Network Monitor")
-app.mount("/static", StaticFiles(directory="static"), name="static")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # --- CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost", "http://127.0.0.1",
-                   "http://localhost:5500", "http://127.0.0.1:5500"],
+    allow_origins=["https://doof.quest"],
     allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["Content-Type"],
 )
@@ -43,10 +40,12 @@ async def limit_request_size(request: Request, call_next):
 # --- In-Memory Storage ---
 hosts = []
 
-# --- Pydantic Model ---
+# --- Pydantic Models ---
 class HostInput(BaseModel):
     host: str
-    ports: list[int] = []
+
+class ScanInput(BaseModel):
+    ports: list[int]
 
 # --- Input Validation ---
 def is_valid_host(host: str) -> bool:
@@ -58,20 +57,23 @@ def is_valid_host(host: str) -> bool:
     pattern = r"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$"
     return re.match(pattern, host) is not None
 
-# --- Routes ---
+# --- Router ---
+router = APIRouter(prefix="/api")
+
+# --- Health Check (on app directly, not under /api) ---
 @app.get("/")
 def root():
     logger.info("Health check called")
     return {"status": "Network Monitor running"}
 
-
-@app.get("/hosts")
+# --- Host Routes ---
+@router.get("/hosts")
 def get_hosts():
     logger.info("Host list requested")
     return {"hosts": hosts}
 
 
-@app.post("/hosts")
+@router.post("/hosts")
 def add_host(data: HostInput):
     host = data.host.strip()
 
@@ -89,7 +91,7 @@ def add_host(data: HostInput):
     entry = {
         "id": str(uuid.uuid4())[:8],
         "host": host,
-        "ports": data.ports,
+        "ports": [],
         "last_scan": None,
         "last_ping": None
     }
@@ -98,7 +100,7 @@ def add_host(data: HostInput):
     return {"message": "Host added", "entry": entry}
 
 
-@app.delete("/hosts/{host_id}")
+@router.delete("/hosts/{host_id}")
 def delete_host(host_id: str):
     for i, h in enumerate(hosts):
         if h["id"] == host_id:
@@ -108,13 +110,13 @@ def delete_host(host_id: str):
     raise HTTPException(status_code=404, detail="Host not found")
 
 
-@app.get("/hosts/{host_id}/scan")
+@router.post("/hosts/{host_id}/scan")
 @limiter.limit("10/minute")
-def scan(host_id: str, request: Request):
+def scan(host_id: str, data: ScanInput, request: Request):
     for h in hosts:
         if h["id"] == host_id:
             try:
-                result = scan_host(h["host"], h["ports"] if h["ports"] else None)
+                result = scan_host(h["host"], data.ports)
                 h["last_scan"] = result
                 return result
             except ValueError as e:
@@ -122,7 +124,7 @@ def scan(host_id: str, request: Request):
     raise HTTPException(status_code=404, detail="Host not found")
 
 
-@app.get("/hosts/{host_id}/ping")
+@router.get("/hosts/{host_id}/ping")
 @limiter.limit("10/minute")
 def ping(host_id: str, request: Request):
     for h in hosts:
@@ -133,7 +135,7 @@ def ping(host_id: str, request: Request):
     raise HTTPException(status_code=404, detail="Host not found")
 
 
-@app.post("/hosts/{host_id}/analyze")
+@router.post("/hosts/{host_id}/analyze")
 @limiter.limit("5/minute")
 async def analyze(host_id: str, request: Request):
     for h in hosts:
@@ -147,17 +149,26 @@ async def analyze(host_id: str, request: Request):
             return {"host": h["host"], "analysis": result}
     raise HTTPException(status_code=404, detail="Host not found")
 
+@router.get("/config")
+def get_config():
+    from api.config import OLLAMA_MODEL
+    return {"model": OLLAMA_MODEL}
 
-@app.get("/dns/lookup")
+# --- DNS Routes ---
+@router.get("/dns/lookup")
 @limiter.limit("10/minute")
 async def dns_lookup(target: str, request: Request):
     result = run_dns_lookup(target)
     return result
 
 
-@app.post("/dns/analyze")
+@router.post("/dns/analyze")
 @limiter.limit("5/minute")
 async def dns_analyze(request: Request):
     body = await request.json()
     result = await analyze_dns(body["dns_result"])
     return {"analysis": result}
+
+
+# --- Register Router ---
+app.include_router(router)

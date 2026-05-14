@@ -1,0 +1,90 @@
+.topbar {
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-primary);
+  padding: 0 20px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.brand {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-purple);
+  flex-shrink: 0;
+}
+
+.nav {
+  display: flex;
+  gap: 2px;
+}
+
+.navBtn {
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.navBtn:hover {
+  color: var(--text-primary);
+}
+
+.navBtn.active {
+  background: #1e2240;
+  color: var(--accent-purple-light);
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apiBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0d1f14;
+  border: 1px solid #1a3d24;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: #4ade80;
+}
+
+.apiDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+  flex-shrink: 0;
+}
+
+.modelBadge {
+  background: var(--bg-card);
+  border: 1px solid var(--border-secondary);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+}

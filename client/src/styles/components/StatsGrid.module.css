@@ -1,0 +1,41 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  border: 1px solid var(--border-primary);
+}
+
+.label {
+  font-size: 11px;
+  color: var(--text-faint);
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.value {
+  font-size: 32px;
+  font-weight: 500;
+}
+
+.hosts {
+  color: var(--text-primary);
+}
+
+.neutral {
+  color: var(--text-primary);
+}
+
+.open {
+  color: var(--status-online);
+}
+
+.closed {
+  color: var(--status-error);
+}

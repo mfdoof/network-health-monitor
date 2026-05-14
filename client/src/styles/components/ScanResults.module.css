@@ -1,0 +1,101 @@
+.area {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  flex-shrink: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sectionLabel {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--accent-purple);
+  font-weight: 500;
+  flex: 1;
+}
+
+.hostTag {
+  font-size: 11px;
+  color: var(--accent-purple);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.upBadge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.up {
+  background: #0d1f14;
+  color: #4ade80;
+  border: 1px solid #1a3d24;
+}
+
+.down {
+  background: #1f0d0d;
+  color: #f87171;
+  border: 1px solid #3d1a1a;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid #1a1d2e;
+  font-size: 12px;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.portNum {
+  color: var(--text-muted);
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.portService {
+  color: var(--accent-purple-light);
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.badgeOpen {
+  background: #0d1f14;
+  color: #4ade80;
+  border: 1px solid #1a3d24;
+}
+
+.badgeClosed {
+  background: #1f0d0d;
+  color: #f87171;
+  border: 1px solid #3d1a1a;
+}
+
+.empty {
+  color: var(--text-faint);
+  font-size: 12px;
+  text-align: center;
+  padding: 24px 0;
+}

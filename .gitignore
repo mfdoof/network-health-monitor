@@ -1,5 +1,16 @@
+# Python
 venv/
-logs/
 __pycache__/
 *.pyc
+logs/
+
+# Environment variables
 .env
+.env.local
+.env.production
+
+# React / Vite
+client/node_modules/
+client/dist/
+client/.env
+client/.env.production

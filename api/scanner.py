@@ -1,6 +1,7 @@
 import socket
 from api.config import SCAN_PORTS, BLACKLISTED_HOSTS
 from api.logger import logger
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 def is_blacklisted(host: str) -> bool:
@@ -24,7 +25,6 @@ def is_host_up(host: str) -> bool:
 
 
 def scan_host(host: str, ports: list = None) -> dict:
-    # Security check — blacklist
     if is_blacklisted(host):
         logger.error(f"Blocked scan attempt on blacklisted host: {host}")
         raise ValueError(f"Host {host} is not allowed to be scanned")
@@ -33,16 +33,23 @@ def scan_host(host: str, ports: list = None) -> dict:
 
     open_ports = []
     closed_ports = []
-
     ports_to_scan = ports if ports else SCAN_PORTS
 
-    for port in ports_to_scan:
-        if is_port_open(host, port):
-            open_ports.append(port)
-        else:
-            closed_ports.append(port)
+    def check_port(port):
+        return port, is_port_open(host, port)
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {executor.submit(check_port, port): port for port in ports_to_scan}
+        for future in as_completed(futures):
+            port, is_open = future.result()
+            if is_open:
+                open_ports.append(port)
+            else:
+                closed_ports.append(port)
 
     up = is_host_up(host)
+    open_ports.sort()
+    closed_ports.sort()
 
     result = {
         "host": host,
@@ -54,6 +61,7 @@ def scan_host(host: str, ports: list = None) -> dict:
     logger.info(f"Scan complete: {host} | up={up} | open={open_ports} | closed={closed_ports}")
 
     return result
+
 
 if __name__ == "__main__":
     result = scan_host("google.com")

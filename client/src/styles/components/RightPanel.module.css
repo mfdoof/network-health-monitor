@@ -1,0 +1,52 @@
+.panel {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: hidden;
+  height: 100%;
+}
+
+.hintCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  flex-shrink: 0;
+}
+
+.hintTitle {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--accent-purple);
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.hintSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hintStep {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.stepNum {
+  font-size: 11px;
+  color: var(--accent-purple);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-secondary);
+  border-radius: 4px;
+  padding: 2px 8px;
+  flex-shrink: 0;
+  letter-spacing: 0.06em;
+}
+
+.stepText {
+  font-size: 13px;
+  color: var(--text-muted);
+}

@@ -1,0 +1,49 @@
+.area {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  flex-shrink: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.title {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--accent-purple-light);
+  font-weight: 500;
+  flex: 1;
+}
+
+.model {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-family: inherit;
+}
+
+.hostTag {
+  font-size: 11px;
+  color: var(--accent-purple);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.text {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.8;
+  border-left: 2px solid var(--accent-purple);
+  padding-left: 12px;
+}

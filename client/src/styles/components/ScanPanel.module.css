@@ -1,0 +1,101 @@
+.panel {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.label {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid var(--border-secondary);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.chip:hover {
+  border-color: var(--accent-purple);
+  color: var(--text-primary);
+}
+
+.chip.on {
+  background: #1e2240;
+  border-color: var(--accent-purple);
+  color: var(--accent-purple-light);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.selectedCount {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.footerBtns {
+  display: flex;
+  gap: 6px;
+}
+
+.cancelBtn {
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-secondary);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.cancelBtn:hover {
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+.scanBtn {
+  font-size: 11px;
+  padding: 5px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--accent-purple);
+  background: #1e2240;
+  color: var(--accent-purple-light);
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  transition: background 0.15s;
+}
+
+.scanBtn:hover:not(:disabled) {
+  background: var(--accent-purple-dark);
+}
+
+.scanBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
