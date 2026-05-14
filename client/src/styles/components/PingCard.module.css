@@ -79,3 +79,17 @@
 .lossBad {
   color: var(--status-error);
 }
+
+.sectionLabel {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--accent-purple);
+  font-weight: 500;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.corner {
+  color: var(--text-faint);
+  letter-spacing: 0;
+}

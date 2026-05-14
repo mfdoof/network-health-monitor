@@ -5,12 +5,17 @@ export default function PingCard({ host, result }) {
 
   return (
     <div className={styles.card}>
-      <div className={styles.header}>
+    <div className={styles.header}>
+        <div className={styles.sectionLabel}>
+        <span className={styles.corner}>╔══</span>
+        {' PING RESULTS '}
+        <span className={styles.corner}>══╗</span>
+        </div>
         <span className={`${styles.status} ${reachable ? styles.reachable : styles.unreachable}`}>
-          {reachable ? 'REACHABLE' : 'UNREACHABLE'}
+        {reachable ? 'REACHABLE' : 'UNREACHABLE'}
         </span>
         <span className={styles.host}>{host}</span>
-      </div>
+    </div>
 
       <div className={styles.stats}>
         <div className={styles.stat}>

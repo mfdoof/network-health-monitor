@@ -133,7 +133,17 @@ export default function App() {
     log('INFO', `Scanning ${ports.length} port(s)`, host?.host)
     try {
       const result = await scanHost(hostId, ports)
-      updateHost(setHosts, hostId, { scanResults: result, isLoading: false })
+      updateHost(setHosts, hostId, {
+        scanResults: {
+          ...result,
+          scanned_at: new Date().toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          })
+        },
+        isLoading: false
+      })
       log('OK', `Scan complete — ${result.open_ports.length} open, ${result.closed_ports.length} closed`, host?.host)
     } catch (err) {
       const msg = parseError(err)
@@ -239,6 +249,7 @@ export default function App() {
           />
           <RightPanel
             stats={stats}
+            hosts={hosts}
             activeHost={activeHost}
             activityLog={activityLog}
           />

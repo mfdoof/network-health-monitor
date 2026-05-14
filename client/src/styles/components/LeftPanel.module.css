@@ -16,7 +16,8 @@
 }
 
 .hostListCard {
-  flex: 1;
+  flex-shrink: 0;
+  max-height: 320px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -28,6 +29,11 @@
   color: var(--accent-purple);
   font-weight: 500;
   margin-bottom: 10px;
+}
+
+.dim {
+  color: var(--text-faint);
+  letter-spacing: 0;
 }
 
 .inputRow {
@@ -84,4 +90,155 @@
   font-size: 12px;
   text-align: center;
   padding: 24px 0;
+}
+
+.froggieCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.froggieCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(83, 74, 183, 0.03) 2px,
+    rgba(83, 74, 183, 0.03) 4px
+  );
+  pointer-events: none;
+}
+
+.froggieLabel {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--accent-purple);
+  font-weight: 500;
+  white-space: nowrap;
+  align-self: flex-start;
+  margin-bottom: 10px;
+}
+
+.corner {
+  color: var(--text-faint);
+  letter-spacing: 0;
+}
+
+.froggieSpacer {
+  height: 128px;
+  width: 100%;
+  position: relative;
+}
+
+.froggie {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #1D9E75;
+  white-space: pre;
+  text-align: center;
+  margin: 0;
+  user-select: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.frogOpen {
+  animation: blinkOpen 4s step-end infinite;
+}
+
+.frogBlink {
+  animation: blinkClose 4s step-end infinite;
+}
+
+@keyframes blinkOpen {
+  0%, 89%  { opacity: 1; }
+  90%, 100% { opacity: 0; }
+}
+
+@keyframes blinkClose {
+  0%, 89%  { opacity: 0; }
+  90%, 100% { opacity: 1; }
+}
+
+.froggieStats {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border-primary);
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  font-size: 11px;
+}
+
+.statRow:last-child {
+  border-bottom: none;
+}
+
+.statKey {
+  color: var(--text-faint);
+  font-family: 'Courier New', monospace;
+}
+
+.statVal {
+  color: var(--text-secondary);
+  font-family: 'Courier New', monospace;
+}
+
+.statOk {
+  color: #1D9E75;
+}
+
+.statIdle {
+  color: var(--accent-purple);
+}
+
+.froggieStatus {
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: #1D9E75;
+  margin-top: 10px;
+  animation: blink 2s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+.froggieDisclaimer {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.6;
+  padding-top: 10px;
+  margin-top: 8px;
+}
+
+.inputError {
+  font-size: 11px;
+  color: var(--status-error);
+  margin-top: 6px;
+  padding-left: 2px;
 }

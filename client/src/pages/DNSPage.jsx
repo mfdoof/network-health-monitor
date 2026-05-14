@@ -2,14 +2,52 @@ import { useState } from 'react'
 import ActivityLog from '../components/ActivityLog'
 import styles from '../styles/components/DNSPage.module.css'
 
+const FROG_OPEN = `
+  / \\
+ _(I)(I)_
+( _ .. _ )
+\`.\\--'.') 
+( ,-./  \\,-.
+(_( || || )_)
+ __\\\\||--||'/__
+\`-._||/\\/||_.-'
+   \`--'\`--'`.trim()
+
+const FROG_BLINK = `
+  / \\
+ _(-)(-)_
+( _ .. _ )
+\`.\\--'.') 
+( ,-./  \\,-.
+(_( || || )_)
+ __\\\\||--||'/__
+\`-._||/\\/||_.-'
+   \`--'\`--'`.trim()
+
 export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, activityLog }) {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [error, setError] = useState('')
+
+  function isValidTarget(val) {
+    const ipv4 = /^(\d{1,3}\.){3}\d{1,3}$/
+    if (ipv4.test(val)) {
+      const parts = val.split('.').map(Number)
+      return parts.every(p => p >= 0 && p <= 255)
+    }
+    const hostname = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/
+    return hostname.test(val)
+  }
 
   async function handleLookup() {
     const val = input.trim()
     if (!val) return
+    if (!isValidTarget(val)) {
+      setError('Invalid hostname or IP address')
+      return
+    }
+    setError('')
     setIsLoading(true)
     await onLookup(val)
     setIsLoading(false)
@@ -45,7 +83,7 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, ac
               className={styles.input}
               placeholder="hostname or IP address"
               value={input}
-              onChange={e => setInput(e.target.value)}
+              onChange={e => { setInput(e.target.value); setError('') }}
               onKeyDown={handleKeyDown}
               disabled={isLoading}
             />
@@ -57,6 +95,7 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, ac
               {isLoading ? '...' : 'LOOKUP'}
             </button>
           </div>
+          {error && <div className={styles.inputError}>{error}</div>}
         </div>
 
         {/* History */}
@@ -82,19 +121,37 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, ac
           )}
         </div>
 
+        {/* Frog Operator */}
+        <div className={styles.froggieCard}>
+          <div className={styles.froggieLabel}>
+            <span className={styles.corner}>←</span>
+            {' DOOF OPERATOR '}
+            <span className={styles.corner}>→</span>
+          </div>
+          <div className={styles.froggieSpacer}>
+            <pre className={`${styles.froggie} ${styles.frogOpen}`}>{FROG_OPEN}</pre>
+            <pre className={`${styles.froggie} ${styles.frogBlink}`}>{FROG_BLINK}</pre>
+          </div>
+          <p className={styles.froggieDisclaimer}>
+            For internal use only. Do not scan hosts you do not own or have explicit permission to test. Use responsibly.
+          </p>
+          <div className={styles.froggieStatus}>STAY VIGILANT</div>
+        </div>
+
       </div>
 
       {/* Right Panel */}
       <div className={styles.rightPanel}>
 
-        {/* DNS Result */}
         {dnsResult ? (
           <>
             {/* Summary */}
             <div className={styles.summaryCard}>
               <div className={styles.summaryHeader}>
                 <div className={styles.sectionLabel}>
-                  {dnsResult.lookup_type === 'forward' ? 'FORWARD LOOKUP' : 'REVERSE LOOKUP'}
+                  <span className={styles.corner}>╔══</span>
+                  {dnsResult.lookup_type === 'forward' ? ' FORWARD LOOKUP ' : ' REVERSE LOOKUP '}
+                  <span className={styles.corner}>══╗</span>
                 </div>
                 <span className={styles.targetTag}>{dnsResult.target}</span>
                 <button
@@ -119,9 +176,13 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, ac
             {dnsResult.lookup_type === 'forward' && (
               <div className={styles.recordsGrid}>
 
-                {/* A Records */}
                 <div className={styles.recordCard}>
-                  <div className={styles.recordLabel}>A RECORDS <span className={styles.recordCount}>{dnsResult.a_records?.length ?? 0}</span></div>
+                  <div className={styles.recordLabel}>
+                    <span className={styles.corner}>╔══</span>
+                    {' A RECORDS '}
+                    <span className={styles.corner}>══╗</span>
+                    <span className={styles.recordCount}>{dnsResult.a_records?.length ?? 0}</span>
+                  </div>
                   {dnsResult.a_records?.length > 0 ? (
                     dnsResult.a_records.map((r, i) => (
                       <div key={i} className={styles.recordRow}>
@@ -134,9 +195,13 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, ac
                   )}
                 </div>
 
-                {/* AAAA Records */}
                 <div className={styles.recordCard}>
-                  <div className={styles.recordLabel}>AAAA RECORDS <span className={styles.recordCount}>{dnsResult.aaaa_records?.length ?? 0}</span></div>
+                  <div className={styles.recordLabel}>
+                    <span className={styles.corner}>╔══</span>
+                    {' AAAA RECORDS '}
+                    <span className={styles.corner}>══╗</span>
+                    <span className={styles.recordCount}>{dnsResult.aaaa_records?.length ?? 0}</span>
+                  </div>
                   {dnsResult.aaaa_records?.length > 0 ? (
                     dnsResult.aaaa_records.map((r, i) => (
                       <div key={i} className={styles.recordRow}>
@@ -149,9 +214,13 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, ac
                   )}
                 </div>
 
-                {/* MX Records */}
                 <div className={styles.recordCard}>
-                  <div className={styles.recordLabel}>MX RECORDS <span className={styles.recordCount}>{dnsResult.mx_records?.length ?? 0}</span></div>
+                  <div className={styles.recordLabel}>
+                    <span className={styles.corner}>╔══</span>
+                    {' MX RECORDS '}
+                    <span className={styles.corner}>══╗</span>
+                    <span className={styles.recordCount}>{dnsResult.mx_records?.length ?? 0}</span>
+                  </div>
                   {dnsResult.mx_records?.length > 0 ? (
                     dnsResult.mx_records.map((r, i) => (
                       <div key={i} className={styles.recordRow}>
@@ -165,9 +234,13 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, ac
                   )}
                 </div>
 
-                {/* NS Records */}
                 <div className={styles.recordCard}>
-                  <div className={styles.recordLabel}>NS RECORDS <span className={styles.recordCount}>{dnsResult.ns_records?.length ?? 0}</span></div>
+                  <div className={styles.recordLabel}>
+                    <span className={styles.corner}>╔══</span>
+                    {' NS RECORDS '}
+                    <span className={styles.corner}>══╗</span>
+                    <span className={styles.recordCount}>{dnsResult.ns_records?.length ?? 0}</span>
+                  </div>
                   {dnsResult.ns_records?.length > 0 ? (
                     dnsResult.ns_records.map((r, i) => (
                       <div key={i} className={styles.recordRow}>
@@ -186,7 +259,12 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, ac
             {/* Reverse lookup records */}
             {dnsResult.lookup_type === 'reverse' && (
               <div className={styles.recordCard}>
-                <div className={styles.recordLabel}>PTR RECORDS <span className={styles.recordCount}>{dnsResult.ptr_records?.length ?? 0}</span></div>
+                <div className={styles.recordLabel}>
+                  <span className={styles.corner}>╔══</span>
+                  {' PTR RECORDS '}
+                  <span className={styles.corner}>══╗</span>
+                  <span className={styles.recordCount}>{dnsResult.ptr_records?.length ?? 0}</span>
+                </div>
                 {dnsResult.ptr_records?.length > 0 ? (
                   dnsResult.ptr_records.map((r, i) => (
                     <div key={i} className={styles.recordRow}>
@@ -204,7 +282,11 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, ac
             {dnsResult.analysis && (
               <div className={styles.aiCard}>
                 <div className={styles.aiHeader}>
-                  <span className={styles.aiTitle}>AI DIAGNOSTIC</span>
+                  <div className={styles.aiTitle}>
+                    <span className={styles.corner}>╔══</span>
+                    {' AI DIAGNOSTIC '}
+                    <span className={styles.corner}>══╗</span>
+                  </div>
                   <span className={styles.aiModel}>ollama / llama3.2</span>
                   <span className={styles.targetTag}>{dnsResult.target}</span>
                 </div>
@@ -214,7 +296,11 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, ac
           </>
         ) : (
           <div className={styles.emptyState}>
-            <div className={styles.emptyTitle}>DOOF DNS LOOKUP</div>
+            <div className={styles.emptyTitle}>
+              <span className={styles.corner}>╔══</span>
+              {' DOOF DNS LOOKUP '}
+              <span className={styles.corner}>══╗</span>
+            </div>
             <div className={styles.emptyHint}>Enter a hostname or IP address to begin</div>
           </div>
         )}

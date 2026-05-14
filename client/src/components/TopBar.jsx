@@ -1,11 +1,22 @@
 import styles from '../styles/components/TopBar.module.css'
 
+const LOGO = `
+██████╗  ██████╗  ██████╗ ███████╗
+██╔══██╗██╔═══██╗██╔═══██╗██╔════╝
+██║  ██║██║   ██║██║   ██║█████╗  
+██║  ██║██║   ██║██║   ██║██╔══╝  
+██████╔╝╚██████╔╝╚██████╔╝██║     
+╚═════╝  ╚═════╝  ╚═════╝ ╚═╝     `.trimStart()
+
 export default function TopBar({ activePage, onNavigate, ollamaModel }) {
   return (
     <div className={styles.topbar}>
       <div className={styles.brand}>
-        <div className={styles.dot} />
-        DOOF NETWORK MONITOR
+        <pre className={styles.logoAscii}>{LOGO}</pre>
+        <div className={styles.brandSub}>
+          <span>NETWORK</span>
+          <span>MONITOR</span>
+        </div>
       </div>
 
       <nav className={styles.nav}>

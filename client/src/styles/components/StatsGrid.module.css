@@ -33,9 +33,29 @@
 }
 
 .open {
-  color: var(--status-online);
+  color: var(--text-primary);
 }
 
 .closed {
-  color: var(--status-error);
+  color: var(--text-primary);
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.sectionLabel {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--accent-purple);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.corner {
+  color: var(--text-faint);
+  letter-spacing: 0;
 }

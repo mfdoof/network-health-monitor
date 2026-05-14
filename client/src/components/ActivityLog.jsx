@@ -1,16 +1,27 @@
+import { useEffect, useRef } from 'react'
 import styles from '../styles/components/ActivityLog.module.css'
 
 const TYPE_STYLES = {
-  INFO:  styles.info,
-  OK:    styles.ok,
-  WARN:  styles.warn,
+  INFO: styles.info,
+  OK: styles.ok,
+  WARN: styles.warn,
   ERROR: styles.error,
 }
 
 export default function ActivityLog({ entries }) {
+  const bottomRef = useRef(null)
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [entries])
+
   return (
     <div className={styles.area}>
-      <div className={styles.sectionLabel}>ACTIVITY LOG</div>
+      <div className={styles.sectionLabel}>
+        <span className={styles.corner}>╔══</span>
+        {' ACTIVITY LOG '}
+        <span className={styles.corner}>══╗</span>
+      </div>
 
       {entries.length === 0 ? (
         <div className={styles.empty}>No activity yet</div>
@@ -30,8 +41,13 @@ export default function ActivityLog({ entries }) {
               </span>
             </div>
           ))}
+          <div ref={bottomRef} />
         </div>
       )}
+
+      <div className={styles.footer}>
+        <span className={styles.corner}>╚{'═'.repeat(40)}╝</span>
+      </div>
     </div>
   )
 }

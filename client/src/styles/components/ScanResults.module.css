@@ -14,10 +14,11 @@
 }
 
 .sectionLabel {
-  font-size: 12px;
+  font-size: 10px;  
   letter-spacing: 0.12em;
   color: var(--accent-purple);
   font-weight: 500;
+  white-space: nowrap;
   flex: 1;
 }
 
@@ -39,8 +40,8 @@
 
 .up {
   background: #0d1f14;
-  color: #4ade80;
-  border: 1px solid #1a3d24;
+  color: #1D9E75; 
+  border: 1px solid rgba(29, 158, 117, 0.3);
 }
 
 .down {
@@ -83,8 +84,8 @@
 
 .badgeOpen {
   background: #0d1f14;
-  color: #4ade80;
-  border: 1px solid #1a3d24;
+  color: #1D9E75; 
+  border: 1px solid rgba(29, 158, 117, 0.3); 
 }
 
 .badgeClosed {
@@ -98,4 +99,69 @@
   font-size: 12px;
   text-align: center;
   padding: 24px 0;
+}
+
+.sectionLabel {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--accent-purple);
+  font-weight: 500;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.corner {
+  color: var(--text-faint);
+  letter-spacing: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid #1a1d2e;
+  font-size: 13px;
+  opacity: 0;
+  animation: rowReveal 0.3s ease forwards;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+@keyframes rowReveal {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.copyBtn {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-secondary);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.copyBtn:hover {
+  border-color: var(--accent-purple);
+  color: var(--accent-purple-light);
+}
+
+.timestamp {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-bottom: 8px;
+  padding-left: 2px;
 }

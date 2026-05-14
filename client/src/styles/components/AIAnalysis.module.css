@@ -10,15 +10,21 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-.title {
-  font-size: 12px;
+.sectionLabel {
+  font-size: 10px;
   letter-spacing: 0.12em;
   color: var(--accent-purple-light);
   font-weight: 500;
+  white-space: nowrap;
   flex: 1;
+}
+
+.corner {
+  color: var(--text-faint);
+  letter-spacing: 0;
 }
 
 .model {
@@ -40,10 +46,96 @@
   padding: 2px 8px;
 }
 
-.text {
-  font-size: 14px;
-  color: var(--text-primary);
-  line-height: 1.8;
-  border-left: 2px solid var(--accent-purple);
+/* Terminal container */
+.terminal {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-family: 'Courier New', monospace;
+}
+
+/* nhm@host:~$ analyze */
+.terminalPrompt {
+  font-size: 12px;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.promptUser {
+  color: #1D9E75;
+}
+
+.promptAt {
+  color: var(--text-faint);
+}
+
+.promptHost {
+  color: #1D9E75;
+}
+
+.promptSep {
+  color: var(--text-faint);
+}
+
+.promptCmd {
+  color: var(--accent-purple-light);
+}
+
+/* Output lines */
+.outputBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-left: 2px solid rgba(127, 119, 221, 0.25);
   padding-left: 12px;
+  margin-left: 2px;
+}
+
+.outputLine {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.linePrefix {
+  color: var(--text-faint);
+  font-size: 12px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.lineText {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* "analysis complete [OK]" footer line */
+.doneLine {
+  font-size: 12px;
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.doneTag {
+  font-size: 10px;
+  color: #1D9E75;
+  border: 1px solid #1D9E75;
+  border-radius: 3px;
+  padding: 1px 6px;
+  letter-spacing: 0.08em;
+}
+
+.cursor {
+  color: var(--accent-purple-light);
+  animation: blink 0.7s step-end infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 }

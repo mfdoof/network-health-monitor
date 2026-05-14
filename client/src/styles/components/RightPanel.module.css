@@ -3,50 +3,188 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  overflow-y: hidden;
+  overflow-y: auto;
   height: 100%;
 }
 
+/* --- Hint Card --- */
 .hintCard {
   background: var(--bg-card);
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
   padding: 24px;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
 }
 
-.hintTitle {
-  font-size: 11px;
+.hintCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(83, 74, 183, 0.03) 2px,
+    rgba(83, 74, 183, 0.03) 4px
+  );
+  pointer-events: none;
+}
+
+.hintHeader {
+  font-size: 10px;
   letter-spacing: 0.12em;
   color: var(--accent-purple);
   font-weight: 500;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
-.hintSteps {
+.corner {
+  color: var(--text-faint);
+  letter-spacing: 0;
+}
+
+.hintBody {
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+}
+
+/* --- Terminal --- */
+.terminal {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: 'Courier New', monospace;
+  padding-right: 32px;
+}
+
+.terminalPrompt {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.promptUser {
+  color: #1D9E75;
+}
+
+.promptAt {
+  color: var(--text-faint);
+}
+
+.promptHost {
+  color: #1D9E75;
+}
+
+.promptSep {
+  color: var(--text-faint);
+}
+
+.termLines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-left: 2px solid rgba(127, 119, 221, 0.2);
+  padding-left: 12px;
+  margin-left: 2px;
+}
+
+.termLine {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.prompt {
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+
+.cmd {
+  color: var(--accent-purple-light);
+  flex-shrink: 0;
+}
+
+.comment {
+  color: var(--text-faint);
+  font-size: 13px;
+}
+
+.noTarget {
+  color: #1D9E75;
+  font-size: 12px;
+}
+
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* --- Divider --- */
+.divider {
+  width: 1px;
+  background: var(--border-primary);
+  margin: 0 32px;
+  flex-shrink: 0;
+}
+
+/* --- Clock --- */
+.clockWrap {
+  flex-shrink: 0;
+  width: 220px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  justify-content: center;
 }
 
-.hintStep {
+.clockLabel {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: #1D9E75;
+  font-weight: 500;
+  font-family: 'Courier New', monospace;
+}
+
+.clockBlock {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.stepNum {
+.clockTime {
+  font-family: 'Courier New', monospace;
+  font-size: 28px;
+  color: #1D9E75;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.clockDate {
+  font-family: 'Courier New', monospace;
   font-size: 11px;
-  color: var(--accent-purple);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-secondary);
-  border-radius: 4px;
-  padding: 2px 8px;
-  flex-shrink: 0;
-  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
 }
 
-.stepText {
-  font-size: 13px;
-  color: var(--text-muted);
+.clockTz {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: var(--text-faint);
+  letter-spacing: 0.08em;
+}
+
+.clockHint {
+  font-size: 10px;
+  color: var(--text-faint);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+  border-top: 1px solid var(--border-primary);
+  padding-top: 10px;
+  margin-top: 2px;
 }
