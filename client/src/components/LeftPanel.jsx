@@ -108,9 +108,9 @@ export default function LeftPanel({
       {/* Frog Server Card */}
         <div className={styles.froggieCard}>
         <div className={styles.froggieLabel}>
-            <span className={styles.corner}>←</span>
+            <span className={styles.corner}>╔══</span>
             {' DOOF SERVER '}
-            <span className={styles.corner}>→</span>
+            <span className={styles.corner}>══╗</span>
         </div>
 
         <div className={styles.froggieSpacer}>

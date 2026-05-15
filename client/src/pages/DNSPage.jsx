@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import ActivityLog from '../components/ActivityLog'
+import AIAnalysis from '../components/AIAnalysis'
 import styles from '../styles/components/DNSPage.module.css'
 
 const FROG_OPEN = `
@@ -124,9 +125,9 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, ac
         {/* Frog Operator */}
         <div className={styles.froggieCard}>
           <div className={styles.froggieLabel}>
-            <span className={styles.corner}>←</span>
-            {' DOOF OPERATOR '}
-            <span className={styles.corner}>→</span>
+            <span className={styles.corner}>╔══</span>
+            {' DOOF SERVER '}
+            <span className={styles.corner}>══╗</span>
           </div>
           <div className={styles.froggieSpacer}>
             <pre className={`${styles.froggie} ${styles.frogOpen}`}>{FROG_OPEN}</pre>
@@ -278,20 +279,9 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, ac
               </div>
             )}
 
-            {/* AI Analysis */}
+            {/* AI Analysis — terminal style, matches Monitor page */}
             {dnsResult.analysis && (
-              <div className={styles.aiCard}>
-                <div className={styles.aiHeader}>
-                  <div className={styles.aiTitle}>
-                    <span className={styles.corner}>╔══</span>
-                    {' AI DIAGNOSTIC '}
-                    <span className={styles.corner}>══╗</span>
-                  </div>
-                  <span className={styles.aiModel}>ollama / llama3.2</span>
-                  <span className={styles.targetTag}>{dnsResult.target}</span>
-                </div>
-                <p className={styles.aiText}>{dnsResult.analysis}</p>
-              </div>
+              <AIAnalysis host={dnsResult.target} analysis={dnsResult.analysis} />
             )}
           </>
         ) : (

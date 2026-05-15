@@ -157,7 +157,7 @@
   padding: 24px 0;
 }
 
-/* Frog card — matches monitor page LeftPanel */
+/* Frog card */
 .froggieCard {
   background: var(--bg-card);
   border: 1px solid var(--border-primary);
@@ -411,47 +411,6 @@
   font-size: 12px;
   color: var(--text-faint);
   padding: 8px 0;
-}
-
-.aiCard {
-  background: var(--bg-card);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-lg);
-  padding: 14px;
-  flex-shrink: 0;
-}
-
-.aiHeader {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.aiTitle {
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  color: var(--accent-purple-light);
-  font-weight: 500;
-  flex: 1;
-}
-
-.aiModel {
-  font-size: 11px;
-  color: var(--text-muted);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-primary);
-  border-radius: 4px;
-  padding: 2px 8px;
-  font-family: inherit;
-}
-
-.aiText {
-  font-size: 13px;
-  color: var(--text-primary);
-  line-height: 1.8;
-  border-left: 2px solid var(--accent-purple);
-  padding-left: 12px;
 }
 
 .emptyState {
