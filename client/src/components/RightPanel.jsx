@@ -48,9 +48,9 @@ export default function RightPanel({ stats, activeHost, activityLog }) {
         {!activeHost && (
           <div className={styles.hintCard}>
             <div className={styles.hintHeader}>
-              <span className={styles.corner}>←</span>
+              <span className={styles.corner}>╔══</span>
               {' AWAITING TARGET '}
-              <span className={styles.corner}>→</span>
+              <span className={styles.corner}>══╗</span>
             </div>
 
             <div className={styles.hintBody}>
