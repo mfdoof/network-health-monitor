@@ -204,7 +204,12 @@ Open ports: {describe_ports(open_ports)}
 Closed ports (scanned set only): {describe_ports(closed_ports)}
 Note: only the above ports were scanned — closed does not mean all other ports are blocked.
 {ping_section}
-Write a 2-3 sentence diagnostic that interprets what these results mean for this host. Then give one specific recommended action. Do not use bullet points. Do not use markdown. Do not use labels like "Recommended action:" in your response."""
+Write a 2-3 sentence diagnostic that interprets what these results mean for this host.
+If something is explicitly visible in the data, state it as fact — do not hedge on things the data makes clear.
+Reserve hedging language only for inferences.
+Then give one recommended action based strictly on what the data shows. If the configuration looks clean and nothing stands out, say so briefly — do not invent concerns or pad the response.
+Do not suggest specific hostnames, server names, or configuration values you cannot see in the data.
+Do not use bullet points. Do not use markdown. Do not use labels like "Recommended action:" in your response."""
 
 
 def build_dns_prompt(dns_result: dict) -> str:
@@ -232,7 +237,11 @@ Lookup type: reverse
 IP: {target}
 PTR records: {ptr_list}
 
-Write a 2-3 sentence explanation of what this reverse DNS result indicates, reasoning only from the hostname string. Then give one recommended action. Do not use bullet points. Do not use markdown. Do not use labels like "Recommended action:" in your response."""
+Write a 2-3 sentence explanation of what this reverse DNS result indicates, reasoning only from the hostname string itself.
+If something is explicitly visible in the data, state it as fact — do not hedge on things the data makes clear.
+Then give one recommended action only if the data suggests something worth investigating. If the PTR record looks correct and complete, say so.
+Do not suggest specific hostnames or configuration values you cannot see in the data.
+Do not use bullet points. Do not use markdown. Do not use labels like "Recommended action:" in your response."""
 
     a_records = [r["address"] for r in dns_result.get("a_records", [])]
     aaaa_records = [r["address"] for r in dns_result.get("aaaa_records", [])]
@@ -264,7 +273,12 @@ AAAA records (IPv6): {", ".join(aaaa_records) or "none"}
 MX records (mail servers): {", ".join(mx_records) or "none"}
 NS records (nameservers): {", ".join(ns_records) or "none"}
 {error_section}
-Write a 2-3 sentence diagnostic that interprets what this DNS configuration means. Then give one specific recommended action. Do not use bullet points. Do not use markdown. Do not use labels like "Recommended action:" in your response."""
+Write a 2-3 sentence diagnostic that interprets what this DNS configuration means.
+If something is explicitly visible in the data, state it as fact — do not hedge on things the data makes clear.
+Reserve hedging language only for inferences.
+Then give one recommended action only if the data shows something incomplete, missing, or worth investigating. If the configuration looks correct and complete, say so briefly — do not invent concerns or pad the response.
+Do not suggest specific hostnames, server names, or configuration values you cannot see in the data.
+Do not use bullet points. Do not use markdown. Do not use labels like "Recommended action:" in your response."""
 
 
 # ---------------------------------------------------------------------------
