@@ -15,4 +15,4 @@ logs/
 client/node_modules/
 client/dist/
 client/.env
-client/.env.production
+client/.env.productionHANDOFF.md
