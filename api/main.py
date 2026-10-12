@@ -1,23 +1,35 @@
 import uuid
 import re
 import ipaddress
-from typing import Annotated, Literal
+from typing import Annotated
 from fastapi import FastAPI, HTTPException, Request, APIRouter, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from pydantic import AfterValidator, BaseModel, Field, field_validator
-from api.config import MAX_REQUEST_SIZE, SCAN_PORTS
+from api.config import MAX_REQUEST_SIZE, SCAN_PORTS, CORS_ORIGINS, TRUST_PROXY
 from api.logger import logger
 from api.scanner import scan_host
 from api.targets import check_target, TargetError, TargetNotAllowed
 from api.analyzer import analyze_scan, analyze_dns
+from api.llm import LLMError, llm_enabled, provider_host
 from api.ping import ping_host
 from api.dns_lookup import run_dns_lookup
 
 # --- App Setup ---
-limiter = Limiter(key_func=get_remote_address)
+def get_client_ip(request: Request) -> str:
+    # Behind a reverse proxy the peer is the proxy, so use the address it appended.
+    # The last entry is the one our proxy added; earlier entries are client-supplied.
+    if TRUST_PROXY:
+        forwarded = request.headers.get("x-forwarded-for", "")
+        last = forwarded.split(",")[-1].strip()
+        if last:
+            return last
+    return get_remote_address(request)
+
+limiter = Limiter(key_func=get_client_ip)
 app = FastAPI(title="Network Monitor")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -25,7 +37,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # --- CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://doof.quest"],
+    allow_origins=CORS_ORIGINS,
     allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["Content-Type"],
 )
@@ -33,10 +45,16 @@ app.add_middleware(
 # --- Request Size Limiting ---
 @app.middleware("http")
 async def limit_request_size(request: Request, call_next):
+    # Raising HTTPException in middleware becomes a 500, so return the response directly
     content_length = request.headers.get("content-length")
-    if content_length and int(content_length) > MAX_REQUEST_SIZE:
-        logger.error(f"Request too large: {content_length} bytes")
-        raise HTTPException(status_code=413, detail="Request too large")
+    if content_length:
+        try:
+            size = int(content_length)
+        except ValueError:
+            return JSONResponse(status_code=400, content={"detail": "Invalid Content-Length"})
+        if size > MAX_REQUEST_SIZE:
+            logger.error(f"Request too large: {size} bytes")
+            return JSONResponse(status_code=413, content={"detail": "Request too large"})
     return await call_next(request)
 
 # --- In-Memory Storage ---
@@ -86,39 +104,8 @@ class ScanInput(BaseModel):
             raise ValueError("Duplicate ports")
         return ports
 
-# Mirrors the dict returned by api/dns_lookup.py
-Name = Annotated[str, Field(max_length=MAX_HOST_LENGTH)]
-Ttl = Annotated[int, Field(ge=0)]
-
-class AddressRecord(BaseModel):
-    address: Name
-    ttl: Ttl
-
-class MxRecord(BaseModel):
-    host: Name
-    preference: Annotated[int, Field(ge=0, le=65535)]
-    ttl: Ttl
-
-class NsRecord(BaseModel):
-    nameserver: Name
-    ttl: Ttl
-
-class PtrRecord(BaseModel):
-    hostname: Name
-    ttl: Ttl
-
-class DnsResult(BaseModel):
-    lookup_type: Literal["forward", "reverse"]
-    target: Name
-    a_records: list[AddressRecord] = Field(default=[], max_length=50)
-    aaaa_records: list[AddressRecord] = Field(default=[], max_length=50)
-    mx_records: list[MxRecord] = Field(default=[], max_length=50)
-    ns_records: list[NsRecord] = Field(default=[], max_length=50)
-    ptr_records: list[PtrRecord] = Field(default=[], max_length=50)
-    errors: list[Annotated[str, Field(max_length=200)]] = Field(default=[], max_length=10)
-
 class DnsAnalyzeInput(BaseModel):
-    dns_result: DnsResult
+    target: HostStr
 
 def target_http_error(e: TargetError) -> HTTPException:
     status = 403 if isinstance(e, TargetNotAllowed) else 400
@@ -213,14 +200,21 @@ async def analyze(host_id: str, request: Request):
                     status_code=400,
                     detail="Run a scan first before analyzing"
                 )
-            result = await analyze_scan(h["last_scan"], h.get("last_ping"))
+            try:
+                result = await analyze_scan(h["last_scan"], h.get("last_ping"))
+            except LLMError as e:
+                raise HTTPException(status_code=e.status_code, detail=str(e))
             return {"host": h["host"], "analysis": result}
     raise HTTPException(status_code=404, detail="Host not found")
 
 @router.get("/config")
 def get_config():
-    from api.config import OLLAMA_MODEL
-    return {"model": OLLAMA_MODEL}
+    from api.config import LLM_MODEL
+    return {
+        "llm_enabled": llm_enabled(),
+        "provider_host": provider_host(),
+        "model": LLM_MODEL or None,
+    }
 
 # --- DNS Routes ---
 @router.get("/dns/lookup")
@@ -233,7 +227,12 @@ async def dns_lookup(target: Annotated[HostStr, Query()], request: Request):
 @router.post("/dns/analyze")
 @limiter.limit("5/minute")
 async def dns_analyze(data: DnsAnalyzeInput, request: Request):
-    result = await analyze_dns(data.dns_result.model_dump())
+    # Look up again server-side rather than trusting a client-supplied result
+    dns_result = run_dns_lookup(data.target)
+    try:
+        result = await analyze_dns(dns_result)
+    except LLMError as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
     return {"analysis": result}
 
 

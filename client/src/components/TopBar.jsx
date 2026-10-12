@@ -8,7 +8,7 @@ const LOGO = `
 ██████╔╝╚██████╔╝╚██████╔╝██║     
 ╚═════╝  ╚═════╝  ╚═════╝ ╚═╝     `.trimStart()
 
-export default function TopBar({ activePage, onNavigate, ollamaModel }) {
+export default function TopBar({ activePage, onNavigate, llmModel }) {
   return (
     <div className={styles.topbar}>
       <div className={styles.brand}>
@@ -40,7 +40,7 @@ export default function TopBar({ activePage, onNavigate, ollamaModel }) {
           API running
         </div>
         <div className={styles.modelBadge}>
-          Ollama | {ollamaModel}
+          AI | {llmModel}
         </div>
       </div>
     </div>

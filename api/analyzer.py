@@ -1,6 +1,5 @@
-import httpx
 import re
-from api.config import OLLAMA_URL, OLLAMA_MODEL
+from api.llm import llm_complete
 from api.logger import logger
 
 
@@ -290,32 +289,10 @@ async def analyze_scan(scan_result: dict, ping_result: dict = None) -> str:
     prompt = build_prompt(scan_result, ping_result)
     logger.info(f"Analyze requested: {scan_result['host']}")
 
-    try:
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            response = await client.post(
-                f"{OLLAMA_URL}/api/generate",
-                json={
-                    "model": OLLAMA_MODEL,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {
-                        "temperature": 0.3,
-                    }
-                }
-            )
-            response.raise_for_status()
-            raw = response.json()["response"].strip()
-            result = re.sub(r'(?i)recommended action[:\s]*', '', raw).strip()
-            logger.info(f"Analyze complete: {scan_result['host']}")
-            return result
-
-    except httpx.TimeoutException:
-        logger.error(f"Ollama timeout for host: {scan_result['host']}")
-        return "AI analysis timed out. Ollama may be under load. Try again."
-
-    except Exception as e:
-        logger.error(f"Ollama unreachable: {str(e)}")
-        return "AI analysis unavailable. Check Ollama is running."
+    raw = await llm_complete(prompt)
+    result = re.sub(r'(?i)recommended action[:\s]*', '', raw).strip()
+    logger.info(f"Analyze complete: {scan_result['host']}")
+    return result
 
 
 async def analyze_dns(dns_result: dict) -> str:
@@ -324,28 +301,6 @@ async def analyze_dns(dns_result: dict) -> str:
     target = dns_result["target"]
     logger.info(f"DNS analyze requested: {target}")
 
-    try:
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            response = await client.post(
-                f"{OLLAMA_URL}/api/generate",
-                json={
-                    "model": OLLAMA_MODEL,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {
-                        "temperature": 0.3,
-                    }
-                }
-            )
-            response.raise_for_status()
-            raw = response.json()["response"].strip()
-            logger.info(f"DNS analyze complete: {target}")
-            return raw
-
-    except httpx.TimeoutException:
-        logger.error(f"Ollama timeout for DNS analyze: {target}")
-        return "AI analysis timed out. Ollama may be under load. Try again."
-
-    except Exception as e:
-        logger.error(f"Ollama unreachable: {str(e)}")
-        return "AI analysis unavailable. Check Ollama is running."
+    result = await llm_complete(prompt)
+    logger.info(f"DNS analyze complete: {target}")
+    return result

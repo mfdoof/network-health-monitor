@@ -3,8 +3,11 @@ import os
 
 load_dotenv()
 
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
+# OpenAI-compatible LLM. Leave LLM_BASE_URL or LLM_MODEL empty to disable AI analysis.
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "").strip()
+LLM_API_KEY = os.getenv("LLM_API_KEY", "").strip()
+LLM_MODEL = os.getenv("LLM_MODEL", "").strip()
+LLM_TIMEOUT = float(os.getenv("LLM_TIMEOUT", "30"))
 MAX_REQUEST_SIZE = int(os.getenv("MAX_REQUEST_SIZE", "1024"))
 
 SCAN_PORTS = [
@@ -15,3 +18,10 @@ SCAN_PORTS = [
 ]
 
 ALLOW_PRIVATE_TARGETS = os.getenv("ALLOW_PRIVATE_TARGETS", "false").strip().lower() == "true"
+
+CORS_ORIGINS = [
+    o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
+    if o.strip()
+]
+
+TRUST_PROXY = os.getenv("TRUST_PROXY", "false").strip().lower() == "true"

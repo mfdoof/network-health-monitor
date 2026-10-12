@@ -2,7 +2,7 @@
 
 A locally-run network health monitoring dashboard built with FastAPI and Python.
 Add hosts, scan their port availability, and get AI-generated diagnostic summaries
-powered by Ollama running llama3.2 locally.
+from any OpenAI-compatible LLM (Groq by default, or local Ollama).
 
 ---
 
@@ -20,21 +20,12 @@ During installation, check "Add Python to PATH".
 
 Download from https://nodejs.org
 
-### 3. Ollama
+### 3. An LLM (optional)
 
-Download from https://ollama.com
+AI analysis needs an OpenAI-compatible API. Scan, ping and DNS work without one.
 
-After installing, open a terminal and run:
-
-```bash
-ollama pull llama3.2
-```
-
-Then start Ollama:
-
-```bash
-ollama serve
-```
+- **Groq** (default): create a key at https://console.groq.com/keys and put it in `LLM_API_KEY`.
+- **Local Ollama**: install from https://ollama.com, run `ollama pull llama3.2`, and use the commented Ollama lines in `.env.example`.
 
 ---
 
@@ -49,8 +40,8 @@ Install backend dependencies:
 
 ```bash
 python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-pip install -r requirements.txt
+source venv/bin/activate
+pip install -r api/requirements.txt
 ```
 
 Install frontend dependencies:
@@ -73,8 +64,8 @@ cp .env.example .env
 Start the backend (from the project root):
 
 ```bash
-source venv/bin/activate        # Windows: venv\Scripts\activate
-uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload
+source venv/bin/activate
+uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload --no-proxy-headers
 ```
 
 Start the frontend (from the `client/` directory):
@@ -94,7 +85,7 @@ Press `CTRL+C` in each terminal to stop.
 1. Select the ports you want to scan using the port toggle buttons
 2. Enter a hostname or IP address and click **Add Host**
 3. Click **Scan** on any host to check port availability
-4. Click **Analyze** to get an AI diagnostic summary from Ollama
+4. Click **Analyze** to get an AI diagnostic summary from the configured LLM
 
 ---
 
@@ -104,11 +95,15 @@ Copy `.env.example` to `.env` and adjust values as needed.
 
 | Variable | Default | Description |
 |---|---|---|
-| OLLAMA_URL | http://localhost:11434 | Ollama server address |
-| OLLAMA_MODEL | llama3.2 | Model to use for analysis |
-| SCAN_PORTS | 22,80,443,3389,8080 | Default allowed ports |
+| LLM_BASE_URL | (empty) | OpenAI-compatible API base URL, e.g. `https://api.groq.com/openai/v1` or `http://localhost:11434/v1`. Empty disables AI analysis |
+| LLM_API_KEY | (empty) | API key sent as a Bearer token. Not needed for local Ollama |
+| LLM_MODEL | (empty) | Model name, e.g. `openai/gpt-oss-120b` (Groq) or `llama3.2` (Ollama). Empty disables AI analysis |
+| LLM_TIMEOUT | 30 | Seconds to wait for the LLM |
+| SCAN_PORTS | 21,22,25,80,443,3306,3389,5432,6379,8080 | Ports scanned when a request sends an empty port list |
 | MAX_REQUEST_SIZE | 1024 | Max request body size in bytes |
 | ALLOW_PRIVATE_TARGETS | false | Allow private, loopback, link-local, CGNAT and other non-public IPs as targets |
+| CORS_ORIGINS | http://localhost:5173 | Comma-separated origins allowed to call the API |
+| TRUST_PROXY | false | Use the last `X-Forwarded-For` address as the client IP for rate limiting. Only enable behind a single reverse proxy that sets it |
 
 ---
 
@@ -137,7 +132,7 @@ There is no in-app login page. Authentication is handled entirely by Cloudflare.
 |---|---|---|---|
 | 1 | Input validation | ✓ | ✓ |
 | 2 | Rate limiting | 10/min scan, 5/min analyze | 10/min scan, 5/min analyze |
-| 3 | CORS restriction | localhost:5173 only | https://doof.quest only |
+| 3 | CORS restriction | `CORS_ORIGINS` (default localhost:5173) | https://doof.quest only |
 | 4 | Config via .env | ✓ | ✓ |
 | 5 | Port scope restriction | ✓ | ✓ |
 | 6 | Non-public targets blocked by resolved IP | ✓ | ✓ |
@@ -150,26 +145,16 @@ There is no in-app login page. Authentication is handled entirely by Cloudflare.
 
 ## Platform Notes
 
-The ping implementation adapts to the host operating system at runtime. If you are running the backend on a different OS than the one it was developed on, be aware of the following differences.
+The backend runs on **Linux and macOS**. Windows is not supported (its `ping` uses different flags and output).
 
-### Ping flag
+Ping runs as `ping -c 4 <ip>` (`ping6` for IPv6 on macOS). Results are parsed from stdout:
 
-| OS | Count flag | Timeout flag | Timeout unit |
-|---|---|---|---|
-| Linux | `-c` | `-W` | seconds |
-| macOS | `-c` | `-W` | milliseconds |
-| Windows | `-n` | `-w` | milliseconds |
+| Field | Linux | macOS |
+|---|---|---|
+| Packets received | `4 received` | `4 packets received` |
+| RTT stats | `rtt min/avg/max/mdev = ...` | `round-trip min/avg/max/stddev = ...` |
 
-### Ping output format
-
-Packet loss and round-trip time are parsed from stdout using OS-specific patterns.
-
-| Field | Linux | macOS | Windows |
-|---|---|---|---|
-| Packets received | `4 received` | `4 packets received` | `Received = 4` |
-| RTT stats | `rtt min/avg/max/mdev = ...` | `round-trip min/avg/max/stddev = ...` | `Average = 12ms` |
-
-If ping results appear empty or malformed after moving the app to a different OS, the output patterns in `api/ping.py` are the first place to check.
+If ping results look empty or wrong, the output patterns in `api/ping.py` are the first place to check.
 
 ---
 
@@ -178,11 +163,15 @@ If ping results appear empty or malformed after moving the app to a different OS
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | / | Health check |
-| GET | /hosts | List all monitored hosts |
-| POST | /hosts | Add a host |
-| DELETE | /hosts/{id} | Remove a host |
-| GET | /hosts/{id}/scan | Scan ports on a host |
-| POST | /hosts/{id}/analyze | AI diagnostic via Ollama |
+| GET | /api/hosts | List all monitored hosts |
+| POST | /api/hosts | Add a host |
+| DELETE | /api/hosts/{id} | Remove a host |
+| POST | /api/hosts/{id}/scan | Scan ports on a host |
+| GET | /api/hosts/{id}/ping | Ping a host |
+| POST | /api/hosts/{id}/analyze | AI diagnostic of the last scan |
+| GET | /api/config | AI status: `llm_enabled`, `provider_host`, `model` (never the key) |
+| GET | /api/dns/lookup?target= | DNS lookup (forward for hostnames, PTR for IPs) |
+| POST | /api/dns/analyze | Look up a target and return an AI diagnostic of the result |
 
 Full interactive API docs available at: http://localhost:8000/docs
 
@@ -194,7 +183,7 @@ Full interactive API docs available at: http://localhost:8000/docs
 |---|---|
 | Backend | Python, FastAPI, Uvicorn |
 | Frontend | React, Vite |
-| AI Integration | Ollama, llama3.2 |
+| AI Integration | Any OpenAI-compatible API via httpx (Groq, OpenRouter, Ollama) |
 | Port Scanning | Python socket (TCP connect) |
 | Rate Limiting | slowapi |
 | Config | python-dotenv |
@@ -204,8 +193,7 @@ Full interactive API docs available at: http://localhost:8000/docs
 ## Known Limitations
 
 - Host list resets on server restart (no persistent storage)
-- Ollama must be running separately before starting the app
-- AI analysis quality depends on Ollama response time
+- AI analysis needs an LLM provider; quality and speed depend on the model you pick
 
 ---
 

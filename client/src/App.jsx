@@ -38,7 +38,7 @@ export default function App() {
   const [activePage, setActivePage] = useState('monitor')
   const [dnsResult, setDnsResult] = useState(null)
   const [dnsHistory, setDnsHistory] = useState([])
-  const [ollamaModel, setOllamaModel] = useState('...')
+  const [llmModel, setLlmModel] = useState('...')
 
   function log(type, message, host = null) {
     setActivityLog(prev => [createLogEntry(type, message, host), ...prev].slice(0, 100))
@@ -63,8 +63,8 @@ export default function App() {
 
     useEffect(() => {
     getConfig()
-      .then(data => setOllamaModel(data.model))
-      .catch(() => setOllamaModel('unavailable'))
+      .then(data => setLlmModel(data.llm_enabled ? data.model : 'off'))
+      .catch(() => setLlmModel('unavailable'))
   }, [])
 
   // --- Add host ---
@@ -208,7 +208,7 @@ export default function App() {
   async function handleDnsAnalyze(result) {
     log('INFO', 'DNS AI analysis requested', result.target)
     try {
-      const data = await dnsAnalyze(result)
+      const data = await dnsAnalyze(result.target)
       setDnsResult(prev => ({ ...prev, analysis: data.analysis }))
       log('OK', 'DNS AI analysis complete', result.target)
     } catch (err) {
@@ -234,7 +234,7 @@ export default function App() {
 
   return (
     <div className={styles.app}>
-      <TopBar activePage={activePage} onNavigate={setActivePage} ollamaModel={ollamaModel} />
+      <TopBar activePage={activePage} onNavigate={setActivePage} llmModel={llmModel} />
 
       {activePage === 'monitor' ? (
         <div className={styles.layout}>

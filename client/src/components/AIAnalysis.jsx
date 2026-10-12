@@ -9,20 +9,19 @@ function formatAsLines(text) {
 }
 
 export default function AIAnalysis({ host, analysis }) {
-  const [displayed, setDisplayed] = useState('')
-  const [done, setDone] = useState(false)
+  // Characters revealed so far, tagged with the text they belong to,
+  // so a new analysis starts from 0 without resetting state in the effect
+  const [progress, setProgress] = useState({ text: analysis, shown: 0 })
+  const shown = progress.text === analysis ? progress.shown : 0
+  const displayed = analysis.slice(0, shown)
+  const done = shown >= analysis.length
 
   useEffect(() => {
-    setDisplayed('')
-    setDone(false)
     let i = 0
     const interval = setInterval(() => {
       i++
-      setDisplayed(analysis.slice(0, i))
-      if (i >= analysis.length) {
-        clearInterval(interval)
-        setDone(true)
-      }
+      setProgress({ text: analysis, shown: i })
+      if (i >= analysis.length) clearInterval(interval)
     }, 18)
     return () => clearInterval(interval)
   }, [analysis])
@@ -38,7 +37,6 @@ export default function AIAnalysis({ host, analysis }) {
           {' AI DIAGNOSTIC '}
           <span className={styles.corner}>→</span>
         </div>
-        <span className={styles.model}>ollama / llama3.2</span>
         <span className={styles.hostTag}>{host}</span>
       </div>
 

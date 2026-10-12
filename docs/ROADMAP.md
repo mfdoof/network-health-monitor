@@ -28,7 +28,7 @@ From a hosted demo to an open-source tool you run locally. One step = one commit
   - Reject hosts that start with `-` (stops them being read as `ping` options).
   - Check: bad bodies return 422, not 500.
 
-- [ ] **3. Config and small fixes**
+- [x] **3. Config and small fixes**
   - `CORS_ORIGINS` setting (default `http://localhost:5173`). Remove the hardcoded `doof.quest`.
   - `TRUST_PROXY` setting: read the client IP from `X-Forwarded-For` only when it's on, so rate limits work behind a proxy.
   - Fix the request-size middleware: it raises `HTTPException` in middleware (that gives a 500). Return a `JSONResponse(413)` instead.
@@ -37,7 +37,7 @@ From a hosted demo to an open-source tool you run locally. One step = one commit
 
 ## Phase 2: AI
 
-- [ ] **4. Provider-agnostic LLM client**
+- [x] **4. Provider-agnostic LLM client**
   - New `api/llm.py`: `llm_complete(prompt) -> str` using `POST {LLM_BASE_URL}/chat/completions` through `httpx`.
   - Settings: `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `LLM_TIMEOUT` (default 30s).
   - `analyzer.py` calls `llm_complete`. Delete the duplicated Ollama calls. Keep the prompts.
