@@ -1,5 +1,7 @@
 # Network Monitor
 
+[![CI](https://github.com/mfdoof/network-health-monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/mfdoof/network-health-monitor/actions/workflows/ci.yml)
+
 A locally-run network health monitoring dashboard built with FastAPI and Python.
 Add hosts, scan their port availability, and get AI-generated diagnostic summaries
 from any OpenAI-compatible LLM (Groq by default, or local Ollama).

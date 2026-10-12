@@ -9,7 +9,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from pydantic import AfterValidator, BaseModel, Field, field_validator
-from api.config import MAX_REQUEST_SIZE, SCAN_PORTS, CORS_ORIGINS, TRUST_PROXY
+from api.config import MAX_REQUEST_SIZE, CORS_ORIGINS, TRUST_PROXY
 from api.logger import logger
 from api.scanner import scan_host
 from api.targets import check_target, TargetError, TargetNotAllowed

@@ -2,3 +2,10 @@
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-q"
+
+[tool.ruff]
+target-version = "py314"
+
+[tool.ruff.lint]
+# Pyflakes and pycodestyle errors only; pinned so ruff upgrades don't add rules
+select = ["E4", "E7", "E9", "F"]

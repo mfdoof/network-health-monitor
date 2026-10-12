@@ -66,7 +66,7 @@ From a hosted demo to an open-source tool you run locally. One step = one commit
   - `compose.yaml`: `api` + `web`, `.env` passed through, ports bound to `127.0.0.1` by default.
   - Check: `docker compose up` gives a working app on a fresh machine.
 
-- [ ] **9. CI** (`.github/workflows/ci.yml`)
+- [x] **9. CI** (`.github/workflows/ci.yml`)
   - On push and PR: `ruff`, `pytest`, `pip-audit`, `npm ci`, `npm run lint`, `npm run build`, `npm audit --audit-level=high`.
 
 - [ ] **10. Docs**
