@@ -14,8 +14,4 @@ SCAN_PORTS = [
     ).split(",")
 ]
 
-BLACKLISTED_HOSTS = os.getenv(
-    "BLACKLISTED_HOSTS",
-    "127.0.0.1,0.0.0.0,localhost,169.254.169.254,::1,0.0.0.0/8,10.0.0.1,192.168.0.1,192.168.1.1,metadata.google.internal"
-).split(",")
-
+ALLOW_PRIVATE_TARGETS = os.getenv("ALLOW_PRIVATE_TARGETS", "false").strip().lower() == "true"

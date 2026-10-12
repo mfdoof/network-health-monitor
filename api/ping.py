@@ -1,15 +1,27 @@
+import ipaddress
 import subprocess
+import sys
 import re
 from api.logger import logger
+from api.targets import check_target
+
+
+def _ping_command(ip: str) -> str:
+    # macOS ping is IPv4 only
+    if sys.platform == "darwin" and ipaddress.ip_address(ip).version == 6:
+        return "ping6"
+    return "ping"
 
 
 def ping_host(host: str, count: int = 4) -> dict:
+    # Re-check at ping time and ping the checked IP (DNS rebinding)
+    ip = check_target(host)
 
-    logger.info(f"Ping started: {host}")
+    logger.info(f"Ping started: {host} ({ip})")
 
     try:
         result = subprocess.run(
-            ["ping", "-c", str(count), host],
+            [_ping_command(ip), "-c", str(count), ip],
             capture_output=True,
             text=True,
             timeout=10

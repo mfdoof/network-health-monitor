@@ -108,7 +108,7 @@ Copy `.env.example` to `.env` and adjust values as needed.
 | OLLAMA_MODEL | llama3.2 | Model to use for analysis |
 | SCAN_PORTS | 22,80,443,3389,8080 | Default allowed ports |
 | MAX_REQUEST_SIZE | 1024 | Max request body size in bytes |
-| BLACKLISTED_HOSTS | 127.0.0.1,0.0.0.0,... | Hosts blocked from scanning |
+| ALLOW_PRIVATE_TARGETS | false | Allow private, loopback, link-local, CGNAT and other non-public IPs as targets |
 
 ---
 
@@ -140,7 +140,7 @@ There is no in-app login page. Authentication is handled entirely by Cloudflare.
 | 3 | CORS restriction | localhost:5173 only | https://doof.quest only |
 | 4 | Config via .env | ✓ | ✓ |
 | 5 | Port scope restriction | ✓ | ✓ |
-| 6 | Host blacklist | ✓ | ✓ |
+| 6 | Non-public targets blocked by resolved IP | ✓ | ✓ |
 | 7 | Request size limiting | ✓ | ✓ |
 | 8 | Edge authentication | — | Cloudflare Zero Trust |
 | 9 | Nginx rate limiting | — | general + expensive zones |

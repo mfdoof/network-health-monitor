@@ -1,6 +1,6 @@
 import uuid
 import re
-import socket
+import ipaddress
 from fastapi import FastAPI, HTTPException, Request, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -9,7 +9,8 @@ from slowapi.errors import RateLimitExceeded
 from pydantic import BaseModel
 from api.config import MAX_REQUEST_SIZE, SCAN_PORTS
 from api.logger import logger
-from api.scanner import scan_host, is_blacklisted
+from api.scanner import scan_host
+from api.targets import check_target, TargetError, TargetNotAllowed
 from api.analyzer import analyze_scan, analyze_dns
 from api.ping import ping_host
 from api.dns_lookup import run_dns_lookup
@@ -50,12 +51,16 @@ class ScanInput(BaseModel):
 # --- Input Validation ---
 def is_valid_host(host: str) -> bool:
     try:
-        socket.inet_aton(host)
+        ipaddress.ip_address(host)
         return True
-    except socket.error:
+    except ValueError:
         pass
     pattern = r"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$"
     return re.match(pattern, host) is not None
+
+def target_http_error(e: TargetError) -> HTTPException:
+    status = 403 if isinstance(e, TargetNotAllowed) else 400
+    return HTTPException(status_code=status, detail=str(e))
 
 # --- Router ---
 router = APIRouter(prefix="/api")
@@ -81,9 +86,11 @@ def add_host(data: HostInput):
         logger.error(f"Invalid host rejected: {host}")
         raise HTTPException(status_code=400, detail="Invalid hostname or IP address")
 
-    if is_blacklisted(host):
-        logger.error(f"Blacklisted host rejected: {host}")
-        raise HTTPException(status_code=403, detail="This host is not allowed")
+    try:
+        check_target(host)
+    except TargetError as e:
+        logger.error(f"Target rejected: {host} | {e}")
+        raise target_http_error(e)
 
     if any(h["host"] == host for h in hosts):
         raise HTTPException(status_code=409, detail="Host already exists")
@@ -119,8 +126,8 @@ def scan(host_id: str, data: ScanInput, request: Request):
                 result = scan_host(h["host"], data.ports)
                 h["last_scan"] = result
                 return result
-            except ValueError as e:
-                raise HTTPException(status_code=403, detail=str(e))
+            except TargetError as e:
+                raise target_http_error(e)
     raise HTTPException(status_code=404, detail="Host not found")
 
 
@@ -129,7 +136,10 @@ def scan(host_id: str, data: ScanInput, request: Request):
 def ping(host_id: str, request: Request):
     for h in hosts:
         if h["id"] == host_id:
-            result = ping_host(h["host"])
+            try:
+                result = ping_host(h["host"])
+            except TargetError as e:
+                raise target_http_error(e)
             h["last_ping"] = result
             return result
     raise HTTPException(status_code=404, detail="Host not found")

@@ -14,7 +14,7 @@ From a hosted demo to an open-source tool you run locally. One step = one commit
 
 ## Phase 1: Security
 
-- [ ] **1. Block private targets by resolved IP**
+- [x] **1. Block private targets by resolved IP**
   - New `api/targets.py`: resolve the host (IPv4 + IPv6), reject it if *any* address is private, loopback, link-local (incl. `169.254.169.254`), CGNAT `100.64.0.0/10`, multicast, reserved or unspecified. Use the `ipaddress` module.
   - Setting `ALLOW_PRIVATE_TARGETS` (default `false`).
   - Check on add **and** again at scan and ping time. Scan and ping the checked IP, not the hostname.
