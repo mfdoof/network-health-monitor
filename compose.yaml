@@ -11,7 +11,7 @@ services:
       TRUST_PROXY: "true"
     sysctls:
       # Lets ping use unprivileged ICMP sockets as the non-root user (no NET_RAW needed)
-      net.ipv4.ping_group_range: "0 2147483647"
+      net.ipv4.ping_group_range: "0 65535"
     restart: unless-stopped
 
   web:
