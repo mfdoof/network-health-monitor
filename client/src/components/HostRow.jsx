@@ -7,7 +7,8 @@ export default function HostRow({
   onPing,
   onToggleScan,
   onScan,
-  onAnalyze
+  onAnalyze,
+  analyzeDisabledReason
 }) {
   const statusClass = host.pingResult
     ? host.pingResult.reachable
@@ -42,8 +43,8 @@ export default function HostRow({
           <button
             className={`${styles.btn} ${styles.analyze}`}
             onClick={() => onAnalyze(host.id)}
-            disabled={host.isLoading || !host.scanResults}
-            title={!host.scanResults ? 'Run a scan first' : ''}
+            disabled={host.isLoading || !host.scanResults || !!analyzeDisabledReason}
+            title={analyzeDisabledReason || (!host.scanResults ? 'Run a scan first' : '')}
           >
             Analyze
           </button>

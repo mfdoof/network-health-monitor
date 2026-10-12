@@ -113,7 +113,7 @@ export default function RightPanel({ stats, activeHost, activityLog }) {
         )}
 
         {activeHost?.scanResults?.analysis && (
-          <AIAnalysis host={activeHost.host} analysis={activeHost.scanResults.analysis} />
+          <AIAnalysis key={activeHost.scanResults.analysisId} host={activeHost.host} analysis={activeHost.scanResults.analysis} />
         )}
 
         <ActivityLog entries={activityLog} />

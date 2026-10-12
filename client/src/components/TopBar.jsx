@@ -8,7 +8,14 @@ const LOGO = `
 ██████╔╝╚██████╔╝╚██████╔╝██║     
 ╚═════╝  ╚═════╝  ╚═════╝ ╚═╝     `.trimStart()
 
-export default function TopBar({ activePage, onNavigate, llmModel }) {
+function llmLabel(config) {
+  if (config === null) return 'AI | ...'
+  if (config.error) return 'AI | unavailable'
+  if (!config.llm_enabled) return 'AI | off'
+  return `${config.provider_host} | ${config.model}`
+}
+
+export default function TopBar({ activePage, onNavigate, llmConfig }) {
   return (
     <div className={styles.topbar}>
       <div className={styles.brand}>
@@ -39,8 +46,8 @@ export default function TopBar({ activePage, onNavigate, llmModel }) {
           <div className={styles.apiDot} />
           API running
         </div>
-        <div className={styles.modelBadge}>
-          AI | {llmModel}
+        <div className={styles.modelBadge} title="LLM provider and model used for AI analysis">
+          {llmLabel(llmConfig)}
         </div>
       </div>
     </div>

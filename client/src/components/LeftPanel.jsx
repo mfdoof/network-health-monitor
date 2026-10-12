@@ -31,7 +31,8 @@ export default function LeftPanel({
   onPing,
   onToggleScan,
   onScan,
-  onAnalyze
+  onAnalyze,
+  analyzeDisabledReason
 }) {
   const [error, setError] = useState('')
   const [input, setInput] = useState('')
@@ -42,7 +43,7 @@ export default function LeftPanel({
       const parts = val.split('.').map(Number)
       return parts.every(p => p >= 0 && p <= 255)
     }
-    const hostname = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/
+    const hostname = /^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/
     return hostname.test(val)
   }
 
@@ -99,6 +100,7 @@ export default function LeftPanel({
                 onToggleScan={onToggleScan}
                 onScan={onScan}
                 onAnalyze={onAnalyze}
+                analyzeDisabledReason={analyzeDisabledReason}
               />
             ))}
           </div>

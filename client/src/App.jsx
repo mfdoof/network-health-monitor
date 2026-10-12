@@ -23,13 +23,15 @@ function updateHost(setHosts, hostId, patch) {
 }
 
 function parseError(err) {
-  try {
-    const parsed = JSON.parse(err.message)
-    if (parsed.status === 429) return '429'
-    return parsed.detail ?? err.message
-  } catch {
-    return err.message
-  }
+  if (err.isRateLimit) return '429'
+  return err.message
+}
+
+function llmDisabledReason(config) {
+  if (config === null) return 'Loading AI settings...'
+  if (config.error) return 'Could not load AI settings from the API'
+  if (!config.llm_enabled) return 'AI analysis is off. Set LLM_BASE_URL and LLM_MODEL in .env'
+  return ''
 }
 
 export default function App() {
@@ -38,7 +40,7 @@ export default function App() {
   const [activePage, setActivePage] = useState('monitor')
   const [dnsResult, setDnsResult] = useState(null)
   const [dnsHistory, setDnsHistory] = useState([])
-  const [llmModel, setLlmModel] = useState('...')
+  const [llmConfig, setLlmConfig] = useState(null)
 
   function log(type, message, host = null) {
     setActivityLog(prev => [createLogEntry(type, message, host), ...prev].slice(0, 100))
@@ -58,13 +60,19 @@ export default function App() {
         setHosts(loaded)
         log('INFO', `Loaded ${loaded.length} host(s) from server`)
       })
-      .catch(err => log('ERROR', `Failed to load hosts: ${err.message}`))
+      .catch(err => log('ERROR', `Failed to load hosts: ${parseError(err)}`))
   }, [])
 
-    useEffect(() => {
+  useEffect(() => {
     getConfig()
-      .then(data => setLlmModel(data.llm_enabled ? data.model : 'off'))
-      .catch(() => setLlmModel('unavailable'))
+      .then(data => {
+        setLlmConfig(data)
+        if (!data.llm_enabled) log('WARN', 'AI analysis is off. Set LLM_BASE_URL and LLM_MODEL in .env')
+      })
+      .catch(err => {
+        setLlmConfig({ error: true })
+        log('ERROR', `Failed to load AI settings: ${parseError(err)}`)
+      })
   }, [])
 
   // --- Add host ---
@@ -168,7 +176,7 @@ export default function App() {
     try {
       const result = await analyzeHost(hostId)
       updateHost(setHosts, hostId, {
-        scanResults: { ...host.scanResults, analysis: result.analysis },
+        scanResults: { ...host.scanResults, analysis: result.analysis, analysisId: crypto.randomUUID() },
         isLoading: false
       })
       log('OK', 'AI analysis complete', host?.host)
@@ -209,7 +217,7 @@ export default function App() {
     log('INFO', 'DNS AI analysis requested', result.target)
     try {
       const data = await dnsAnalyze(result.target)
-      setDnsResult(prev => ({ ...prev, analysis: data.analysis }))
+      setDnsResult(prev => ({ ...prev, analysis: data.analysis, analysisId: crypto.randomUUID() }))
       log('OK', 'DNS AI analysis complete', result.target)
     } catch (err) {
       const msg = parseError(err)
@@ -229,12 +237,14 @@ export default function App() {
     closed: hosts.reduce((acc, h) => acc + (h.scanResults?.closed_ports?.length ?? 0), 0)
   }
 
+  const analyzeDisabledReason = llmDisabledReason(llmConfig)
+
   // --- Active ping/scan results (most recent) ---
   const activeHost = [...hosts].reverse().find(h => h.pingResult || h.scanResults) ?? null
 
   return (
     <div className={styles.app}>
-      <TopBar activePage={activePage} onNavigate={setActivePage} llmModel={llmModel} />
+      <TopBar activePage={activePage} onNavigate={setActivePage} llmConfig={llmConfig} />
 
       {activePage === 'monitor' ? (
         <div className={styles.layout}>
@@ -246,6 +256,7 @@ export default function App() {
             onToggleScan={handleToggleScan}
             onScan={handleScan}
             onAnalyze={handleAnalyze}
+            analyzeDisabledReason={analyzeDisabledReason}
           />
           <RightPanel
             stats={stats}
@@ -260,6 +271,7 @@ export default function App() {
           dnsHistory={dnsHistory}
           onLookup={handleDnsLookup}
           onAnalyze={handleDnsAnalyze}
+          analyzeDisabledReason={analyzeDisabledReason}
           activityLog={activityLog}
         />
       )}

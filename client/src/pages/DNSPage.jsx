@@ -25,7 +25,7 @@ const FROG_BLINK = `
 \`-._||/\\/||_.-'
    \`--'\`--'`.trim()
 
-export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, activityLog }) {
+export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, analyzeDisabledReason, activityLog }) {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
@@ -37,7 +37,7 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, ac
       const parts = val.split('.').map(Number)
       return parts.every(p => p >= 0 && p <= 255)
     }
-    const hostname = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/
+    const hostname = /^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/
     return hostname.test(val)
   }
 
@@ -158,10 +158,10 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, ac
                 <button
                   className={styles.analyzeBtn}
                   onClick={handleAnalyze}
-                  disabled={isAnalyzing || !!dnsResult.analysis}
-                  title={dnsResult.analysis ? 'Analysis already done' : ''}
+                  disabled={isAnalyzing || !!dnsResult.analysis || !!analyzeDisabledReason}
+                  title={analyzeDisabledReason || (dnsResult.analysis ? 'Analysis already done' : '')}
                 >
-                  {isAnalyzing ? 'Analyzing...' : 'AI Analyze'}
+                  {isAnalyzing ? 'Analyzing...' : analyzeDisabledReason ? 'AI off' : 'AI Analyze'}
                 </button>
               </div>
               {dnsResult.errors?.length > 0 && (
@@ -281,7 +281,7 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, ac
 
             {/* AI Analysis — terminal style, matches Monitor page */}
             {dnsResult.analysis && (
-              <AIAnalysis host={dnsResult.target} analysis={dnsResult.analysis} />
+              <AIAnalysis key={dnsResult.analysisId} host={dnsResult.target} analysis={dnsResult.analysis} />
             )}
           </>
         ) : (

@@ -50,7 +50,7 @@ From a hosted demo to an open-source tool you run locally. One step = one commit
   - Setting `LLM_REDACT` (default `true`).
   - Check: a test proves no private IP or the original hostname appears in the outgoing prompt.
 
-- [ ] **6. Frontend**
+- [x] **6. Frontend**
   - Hide or disable Analyze when `llm_enabled` is false, and say why.
   - Show the provider and model in the top bar.
   - Show the API's error messages instead of raw text.
