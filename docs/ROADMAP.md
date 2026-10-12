@@ -21,7 +21,7 @@ From a hosted demo to an open-source tool you run locally. One step = one commit
   - Remove `BLACKLISTED_HOSTS` (replaced by the range checks).
   - Check: `localhost`, `10.0.0.5`, `::1` and a hostname that resolves to a private IP are all rejected. `scanme.nmap.org` is allowed.
 
-- [ ] **2. Input validation**
+- [x] **2. Input validation**
   - Pydantic model for the `/api/dns/analyze` body (no raw `request.json()`).
   - Scan ports: 1–65535, max 20 per request, no duplicates.
   - Validate the DNS lookup `target` (hostname or IP, ≤ 253 chars).

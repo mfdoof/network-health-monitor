@@ -1,12 +1,13 @@
 import uuid
 import re
 import ipaddress
-from fastapi import FastAPI, HTTPException, Request, APIRouter
+from typing import Annotated, Literal
+from fastapi import FastAPI, HTTPException, Request, APIRouter, Query
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from pydantic import BaseModel
+from pydantic import AfterValidator, BaseModel, Field, field_validator
 from api.config import MAX_REQUEST_SIZE, SCAN_PORTS
 from api.logger import logger
 from api.scanner import scan_host
@@ -41,14 +42,11 @@ async def limit_request_size(request: Request, call_next):
 # --- In-Memory Storage ---
 hosts = []
 
-# --- Pydantic Models ---
-class HostInput(BaseModel):
-    host: str
-
-class ScanInput(BaseModel):
-    ports: list[int]
-
 # --- Input Validation ---
+MAX_HOST_LENGTH = 253
+MAX_SCAN_PORTS = 20
+
+
 def is_valid_host(host: str) -> bool:
     try:
         ipaddress.ip_address(host)
@@ -57,6 +55,70 @@ def is_valid_host(host: str) -> bool:
         pass
     pattern = r"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$"
     return re.match(pattern, host) is not None
+
+
+def validate_host(host: str) -> str:
+    host = host.strip()
+    if not host or len(host) > MAX_HOST_LENGTH:
+        raise ValueError(f"Host must be 1-{MAX_HOST_LENGTH} characters")
+    # A leading "-" could be read as a ping option
+    if host.startswith("-"):
+        raise ValueError("Host must not start with '-'")
+    if not is_valid_host(host):
+        raise ValueError("Invalid hostname or IP address")
+    return host
+
+
+HostStr = Annotated[str, AfterValidator(validate_host)]
+Port = Annotated[int, Field(ge=1, le=65535)]
+
+# --- Pydantic Models ---
+class HostInput(BaseModel):
+    host: HostStr
+
+class ScanInput(BaseModel):
+    ports: list[Port] = Field(max_length=MAX_SCAN_PORTS)
+
+    @field_validator("ports")
+    @classmethod
+    def no_duplicates(cls, ports: list[int]) -> list[int]:
+        if len(set(ports)) != len(ports):
+            raise ValueError("Duplicate ports")
+        return ports
+
+# Mirrors the dict returned by api/dns_lookup.py
+Name = Annotated[str, Field(max_length=MAX_HOST_LENGTH)]
+Ttl = Annotated[int, Field(ge=0)]
+
+class AddressRecord(BaseModel):
+    address: Name
+    ttl: Ttl
+
+class MxRecord(BaseModel):
+    host: Name
+    preference: Annotated[int, Field(ge=0, le=65535)]
+    ttl: Ttl
+
+class NsRecord(BaseModel):
+    nameserver: Name
+    ttl: Ttl
+
+class PtrRecord(BaseModel):
+    hostname: Name
+    ttl: Ttl
+
+class DnsResult(BaseModel):
+    lookup_type: Literal["forward", "reverse"]
+    target: Name
+    a_records: list[AddressRecord] = Field(default=[], max_length=50)
+    aaaa_records: list[AddressRecord] = Field(default=[], max_length=50)
+    mx_records: list[MxRecord] = Field(default=[], max_length=50)
+    ns_records: list[NsRecord] = Field(default=[], max_length=50)
+    ptr_records: list[PtrRecord] = Field(default=[], max_length=50)
+    errors: list[Annotated[str, Field(max_length=200)]] = Field(default=[], max_length=10)
+
+class DnsAnalyzeInput(BaseModel):
+    dns_result: DnsResult
 
 def target_http_error(e: TargetError) -> HTTPException:
     status = 403 if isinstance(e, TargetNotAllowed) else 400
@@ -80,11 +142,7 @@ def get_hosts():
 
 @router.post("/hosts")
 def add_host(data: HostInput):
-    host = data.host.strip()
-
-    if not is_valid_host(host):
-        logger.error(f"Invalid host rejected: {host}")
-        raise HTTPException(status_code=400, detail="Invalid hostname or IP address")
+    host = data.host
 
     try:
         check_target(host)
@@ -167,16 +225,15 @@ def get_config():
 # --- DNS Routes ---
 @router.get("/dns/lookup")
 @limiter.limit("10/minute")
-async def dns_lookup(target: str, request: Request):
+async def dns_lookup(target: Annotated[HostStr, Query()], request: Request):
     result = run_dns_lookup(target)
     return result
 
 
 @router.post("/dns/analyze")
 @limiter.limit("5/minute")
-async def dns_analyze(request: Request):
-    body = await request.json()
-    result = await analyze_dns(body["dns_result"])
+async def dns_analyze(data: DnsAnalyzeInput, request: Request):
+    result = await analyze_dns(data.dns_result.model_dump())
     return {"analysis": result}
 
 
