@@ -1,209 +1,118 @@
-# Network Monitor
+# Network Health Monitor
+
+A self-hosted dashboard for ping, TCP port scans, DNS lookups and LLM-written diagnostic summaries.
 
 [![CI](https://github.com/mfdoof/network-health-monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/mfdoof/network-health-monitor/actions/workflows/ci.yml)
 
-A locally-run network health monitoring dashboard built with FastAPI and Python.
-Add hosts, scan their port availability, and get AI-generated diagnostic summaries
-from any OpenAI-compatible LLM (Groq by default, or local Ollama).
+## Features
 
----
+- Ping hosts and see latency and packet loss
+- TCP connect scan of up to 20 chosen ports per host
+- DNS lookups: A, AAAA, MX and NS for hostnames, PTR for IPs
+- AI diagnostic summaries from any OpenAI-compatible API (Groq, OpenRouter, local Ollama)
+- IPs and hostnames redacted before anything reaches the LLM
+- Private, loopback and cloud-metadata targets blocked by default
 
-## Prerequisites
-
-These must be installed manually before running the app.
-
-### 1. Python 3.10+
-
-Download from https://python.org
-
-During installation, check "Add Python to PATH".
-
-### 2. Node.js v22+
-
-Download from https://nodejs.org
-
-### 3. An LLM (optional)
-
-AI analysis needs an OpenAI-compatible API. Scan, ping and DNS work without one.
-
-- **Groq** (default): create a key at https://console.groq.com/keys and put it in `LLM_API_KEY`.
-- **Local Ollama**: install from https://ollama.com, run `ollama pull llama3.2`, and use the commented Ollama lines in `.env.example`.
-
----
-
-## Installation
+## Quick start (Docker)
 
 ```bash
-git clone https://github.com/mfdoof/network-health-monitor.git
-cd network-monitor
+git clone https://github.com/mfdoof/network-health-monitor.git && cd network-health-monitor
+cp .env.example .env    # add LLM_API_KEY to enable AI analysis
+docker compose up -d --build
 ```
 
-Install backend dependencies:
+Open http://localhost:8080. Stop it with `docker compose down`.
+
+## Manual setup
+
+Needs Python 3.14 and Node.js 24 (the versions CI and Docker use).
+
+Backend, from the repo root:
 
 ```bash
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 pip install -r api/requirements.txt
+cp .env.example .env
+uvicorn api.main:app --host 127.0.0.1 --port 8000 --no-proxy-headers
 ```
 
-Install frontend dependencies:
+Frontend, in a second terminal:
 
 ```bash
 cd client
-npm install
-```
-
-Copy the environment file and adjust as needed:
-
-```bash
-cp .env.example .env
-```
-
----
-
-## Running the App
-
-Start the backend (from the project root):
-
-```bash
-source venv/bin/activate
-uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload --no-proxy-headers
-```
-
-Start the frontend (from the `client/` directory):
-
-```bash
+npm ci
 npm run dev
 ```
 
-Then open your browser and go to: http://localhost:5173
-
-Press `CTRL+C` in each terminal to stop.
-
----
-
-## Usage
-
-1. Select the ports you want to scan using the port toggle buttons
-2. Enter a hostname or IP address and click **Add Host**
-3. Click **Scan** on any host to check port availability
-4. Click **Analyze** to get an AI diagnostic summary from the configured LLM
-
----
+Open http://localhost:5173. API docs are at http://localhost:8000/docs.
 
 ## Configuration
 
-Copy `.env.example` to `.env` and adjust values as needed.
+Copy `.env.example` to `.env` and edit it. "Default" is the value used when a setting is missing.
 
-| Variable | Default | Description |
-|---|---|---|
-| LLM_BASE_URL | (empty) | OpenAI-compatible API base URL, e.g. `https://api.groq.com/openai/v1` or `http://localhost:11434/v1`. Empty disables AI analysis |
-| LLM_API_KEY | (empty) | API key sent as a Bearer token. Not needed for local Ollama |
-| LLM_MODEL | (empty) | Model name, e.g. `openai/gpt-oss-120b` (Groq) or `llama3.2` (Ollama). Empty disables AI analysis |
-| LLM_TIMEOUT | 30 | Seconds to wait for the LLM |
-| LLM_REDACT | true | Replace every IP and hostname with placeholders (`IP_1`, `HOST_1`) before sending data to the LLM, and restore them in the reply. Set to `false` to send data unchanged |
-| SCAN_PORTS | 21,22,25,80,443,3306,3389,5432,6379,8080 | Ports scanned when a request sends an empty port list |
-| MAX_REQUEST_SIZE | 1024 | Max request body size in bytes |
-| ALLOW_PRIVATE_TARGETS | false | Allow private, loopback, link-local, CGNAT and other non-public IPs as targets |
-| CORS_ORIGINS | http://localhost:5173 | Comma-separated origins allowed to call the API |
-| TRUST_PROXY | false | Use the last `X-Forwarded-For` address as the client IP for rate limiting. Only enable behind a single reverse proxy that sets it |
-| WEB_BIND | 127.0.0.1 | Docker Compose only: host address the web container binds to. Use `0.0.0.0` to expose it on your LAN |
-| WEB_PORT | 8080 | Docker Compose only: host port for the web container |
-
----
-
-## Authentication
-
-### Local development
-
-No authentication. The app is accessible at `http://localhost:5173` with no login required. Keep this instance off any public network.
-
-### Hosted instance (doof.quest)
-
-Access is protected by Cloudflare Zero Trust at the edge, before any request reaches the origin server.
-
-- Access requires a verified email address on the allow list
-- A one-time passcode is sent to that email on each login
-- Sessions are managed via a signed JWT cookie issued by Cloudflare Access
-- No unauthenticated request reaches the origin
-
-There is no in-app login page. Authentication is handled entirely by Cloudflare.
-
----
-
-## Security Measures
-
-| # | Measure | Local | Hosted (doof.quest) |
+| Setting | In `.env.example` | Default | Description |
 |---|---|---|---|
-| 1 | Input validation | ✓ | ✓ |
-| 2 | Rate limiting | 10/min scan, 5/min analyze | 10/min scan, 5/min analyze |
-| 3 | CORS restriction | `CORS_ORIGINS` (default localhost:5173) | https://doof.quest only |
-| 4 | Config via .env | ✓ | ✓ |
-| 5 | Port scope restriction | ✓ | ✓ |
-| 6 | Non-public targets blocked by resolved IP | ✓ | ✓ |
-| 7 | Request size limiting | ✓ | ✓ |
-| 8 | Edge authentication | — | Cloudflare Zero Trust |
-| 9 | Nginx rate limiting | — | general + expensive zones |
-| 10 | Fail2ban | — | SSH + Nginx jails |
+| `MAX_REQUEST_SIZE` | `1024` | `1024` | Max request body in bytes |
+| `SCAN_PORTS` | `21,22,25,80,443,3306,3389,5432,6379,8080` | same | Ports scanned when a request sends an empty port list |
+| `ALLOW_PRIVATE_TARGETS` | `false` | `false` | Allow private, loopback, link-local, CGNAT and other non-public targets |
+| `CORS_ORIGINS` | `http://localhost:5173` | same | Comma-separated origins allowed to call the API |
+| `TRUST_PROXY` | `false` | `false` | Use the last `X-Forwarded-For` address as the client IP for rate limits. Only enable behind one reverse proxy that sets it (Docker Compose turns it on) |
+| `LLM_BASE_URL` | `https://api.groq.com/openai/v1` | empty | OpenAI-compatible API base URL. Empty disables AI analysis |
+| `LLM_API_KEY` | empty | empty | API key, sent as a Bearer token. Not needed for local Ollama |
+| `LLM_MODEL` | `openai/gpt-oss-120b` | empty | Model name. Empty disables AI analysis |
+| `LLM_TIMEOUT` | `30` | `30` | Seconds to wait for the LLM |
+| `LLM_REDACT` | `true` | `true` | Replace IPs and hostnames with placeholders (`IP_1`, `HOST_1`) before sending data to the LLM. Only `false` turns it off |
+| `WEB_BIND` | `127.0.0.1` | `127.0.0.1` | Docker Compose only: host address for the web container |
+| `WEB_PORT` | `8080` | `8080` | Docker Compose only: host port for the web container |
 
----
+## LLM providers
 
-## Platform Notes
+Any OpenAI-compatible `/chat/completions` API works. Free tiers and rate limits change, so check each provider's own page.
 
-The backend runs on **Linux and macOS**. Windows is not supported (its `ping` uses different flags and output).
+**Groq** (default): [API keys](https://console.groq.com/keys), [models](https://console.groq.com/docs/models), [rate limits](https://console.groq.com/docs/rate-limits)
 
-Ping runs as `ping -c 4 <ip>` (`ping6` for IPv6 on macOS). Results are parsed from stdout:
+```env
+LLM_BASE_URL=https://api.groq.com/openai/v1
+LLM_API_KEY=your-groq-key
+LLM_MODEL=openai/gpt-oss-120b
+```
 
-| Field | Linux | macOS |
-|---|---|---|
-| Packets received | `4 received` | `4 packets received` |
-| RTT stats | `rtt min/avg/max/mdev = ...` | `round-trip min/avg/max/stddev = ...` |
+**OpenRouter**: [quickstart](https://openrouter.ai/docs/quickstart), [models](https://openrouter.ai/models) (free variants end in `:free`), [rate limits](https://openrouter.ai/docs/api/reference/limits)
 
-If ping results look empty or wrong, the output patterns in `api/ping.py` are the first place to check.
+```env
+LLM_BASE_URL=https://openrouter.ai/api/v1
+LLM_API_KEY=your-openrouter-key
+LLM_MODEL=openai/gpt-oss-120b
+```
 
----
+**Local Ollama**: [OpenAI compatibility](https://docs.ollama.com/api/openai-compatibility). No key, and no data leaves your machine. Run `ollama pull llama3.2` first.
 
-## API Endpoints
+```env
+LLM_BASE_URL=http://localhost:11434/v1
+LLM_API_KEY=
+LLM_MODEL=llama3.2
+```
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | / | Health check |
-| GET | /api/hosts | List all monitored hosts |
-| POST | /api/hosts | Add a host |
-| DELETE | /api/hosts/{id} | Remove a host |
-| POST | /api/hosts/{id}/scan | Scan ports on a host |
-| GET | /api/hosts/{id}/ping | Ping a host |
-| POST | /api/hosts/{id}/analyze | AI diagnostic of the last scan |
-| GET | /api/config | AI status: `llm_enabled`, `provider_host`, `model` (never the key) |
-| GET | /api/dns/lookup?target= | DNS lookup (forward for hostnames, PTR for IPs) |
-| POST | /api/dns/analyze | Look up a target and return an AI diagnostic of the result |
+When the API runs in Docker, `localhost` is the container itself, so point `LLM_BASE_URL` at your host's address instead.
 
-Full interactive API docs available at: http://localhost:8000/docs
+## Security model
 
----
+- **Private targets blocked by default.** Hosts are checked by resolved IP, not by name. Private, loopback, link-local (including `169.254.169.254`), CGNAT, multicast and reserved ranges are rejected if *any* address matches. The name is resolved again at scan and ping time and the checked IP is used, which stops DNS rebinding. Set `ALLOW_PRIVATE_TARGETS=true` to scan your own LAN.
+- **Redaction on by default.** Every IP and hostname is swapped for a placeholder before the prompt is sent, and the real values are put back in the reply.
+- **Rate limits per client IP:** 10/min for scan, ping and DNS lookup; 5/min for AI analysis.
+- **No authentication.** Anyone who can reach the app can use it to scan. Keep it on localhost, your LAN or a VPN. Don't expose it to the internet.
 
-## Tech Stack
+## Limitations
 
-| Layer | Technology |
-|---|---|
-| Backend | Python, FastAPI, Uvicorn |
-| Frontend | React, Vite |
-| AI Integration | Any OpenAI-compatible API via httpx (Groq, OpenRouter, Ollama) |
-| Port Scanning | Python socket (TCP connect) |
-| Rate Limiting | slowapi |
-| Config | python-dotenv |
+- Hosts and results are kept in memory and lost on restart.
+- Linux and macOS only (ping output is parsed for those two). The Docker image is Linux.
+- No login or user accounts.
 
----
+## Contributing
 
-## Known Limitations
+See [CONTRIBUTING.md](CONTRIBUTING.md). Report vulnerabilities as described in [SECURITY.md](SECURITY.md).
 
-- Host list resets on server restart (no persistent storage)
-- AI analysis needs an LLM provider; quality and speed depend on the model you pick
+## License
 
----
-
-## Future Improvements
-
-- Persistent storage with a database
-- In-app authentication with JWT (session management at the application layer)
-- Docker containerization
+MIT. See [LICENSE](LICENSE).

@@ -29,7 +29,7 @@ Goal: an open-source project people run locally. It is **not** hosted publicly.
 ## Commands
 ```bash
 # backend (repo root)
-python -m venv venv && source venv/bin/activate
+python3 -m venv venv && source venv/bin/activate
 pip install -r api/requirements.txt
 uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload --no-proxy-headers
 pytest                      # after Phase 3 step 7

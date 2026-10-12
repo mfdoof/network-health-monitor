@@ -69,7 +69,7 @@ From a hosted demo to an open-source tool you run locally. One step = one commit
 - [x] **9. CI** (`.github/workflows/ci.yml`)
   - On push and PR: `ruff`, `pytest`, `pip-audit`, `npm ci`, `npm run lint`, `npm run build`, `npm audit --audit-level=high`.
 
-- [ ] **10. Docs**
+- [x] **10. Docs**
   - README in standard order: title + one-line description, screenshot, features, quick start (Docker, then manual), configuration table, LLM providers (Groq, OpenRouter, Ollama), security model, limitations, contributing, license.
   - Add `LICENSE` (MIT), `SECURITY.md` (how to report, what's in scope), `CONTRIBUTING.md` (setup, run tests, PR rules).
   - Check provider free limits against each provider's own docs before writing them.
@@ -79,3 +79,4 @@ From a hosted demo to an open-source tool you run locally. One step = one commit
 - [ ] **11. Homelab instance.** An LXC with Docker behind the existing reverse proxy, LAN and VPN only, `ALLOW_PRIVATE_TARGETS=true`.
 - [ ] **12. Retire the old hosting docs.** Archive the `selfhosted-web-server` repo or mark it retired, with a link here.
 - [ ] **13. Portfolio.** Screenshots and a GIF, a project page with the architecture and security choices.
+  - Add the portfolio project link to the README and the repo's website field once the page is live.
