@@ -16,3 +16,8 @@ client/node_modules/
 client/dist/
 client/.env
 client/.env.productionHANDOFF.md
+
+# Local planning notes (not published)
+HANDOFF.md
+docs/ROADMAP.md
+CLAUDE.md
