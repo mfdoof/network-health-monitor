@@ -61,7 +61,7 @@ From a hosted demo to an open-source tool you run locally. One step = one commit
   - Target validation, input models, redaction, and the LLM client with a mocked HTTP response (`respx` or `httpx.MockTransport`).
   - No real network calls in tests.
 
-- [ ] **8. Docker**
+- [x] **8. Docker**
   - `Dockerfile` for the API (slim Python, non-root user). The `client` builds to static files served by an nginx container.
   - `compose.yaml`: `api` + `web`, `.env` passed through, ports bound to `127.0.0.1` by default.
   - Check: `docker compose up` gives a working app on a fresh machine.

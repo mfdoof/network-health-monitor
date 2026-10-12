@@ -1,0 +1,6 @@
+# Build context for api/Dockerfile (repo root). Only api/ is needed.
+*
+!api/
+api/__pycache__/
+api/**/__pycache__/
+api/requirements-dev.txt

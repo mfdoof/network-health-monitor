@@ -105,6 +105,8 @@ Copy `.env.example` to `.env` and adjust values as needed.
 | ALLOW_PRIVATE_TARGETS | false | Allow private, loopback, link-local, CGNAT and other non-public IPs as targets |
 | CORS_ORIGINS | http://localhost:5173 | Comma-separated origins allowed to call the API |
 | TRUST_PROXY | false | Use the last `X-Forwarded-For` address as the client IP for rate limiting. Only enable behind a single reverse proxy that sets it |
+| WEB_BIND | 127.0.0.1 | Docker Compose only: host address the web container binds to. Use `0.0.0.0` to expose it on your LAN |
+| WEB_PORT | 8080 | Docker Compose only: host port for the web container |
 
 ---
 

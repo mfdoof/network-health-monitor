@@ -1,0 +1,24 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # Requests arrive through the web container's nginx
+      TRUST_PROXY: "true"
+    sysctls:
+      # Lets ping use unprivileged ICMP sockets as the non-root user (no NET_RAW needed)
+      net.ipv4.ping_group_range: "0 2147483647"
+    restart: unless-stopped
+
+  web:
+    build: client
+    ports:
+      - "${WEB_BIND:-127.0.0.1}:${WEB_PORT:-8080}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
