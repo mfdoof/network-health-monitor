@@ -1,4 +1,4 @@
-const BASE = import.meta.env.VITE_API_BASE
+const BASE = import.meta.env.VITE_API_BASE || '/api'
 
 // --- Hosts ---
 
@@ -59,11 +59,11 @@ export async function dnsLookup(target) {
   return res.json()
 }
 
-export async function dnsAnalyze(dnsResult) {
+export async function dnsAnalyze(target) {
   const res = await fetch(`${BASE}/dns/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ dns_result: dnsResult })
+    body: JSON.stringify({ target })
   })
   if (!res.ok) throw new Error(await res.text())
   return res.json()
