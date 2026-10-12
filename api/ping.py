@@ -34,12 +34,14 @@ def ping_host(host: str, count: int = 4) -> dict:
         packet_loss = float(loss_match.group(1)) if loss_match else 100.0
 
         # --- Parse packets sent/received ---
-        packets_match = re.search(r"(\d+) packets transmitted, (\d+) received", output)
+        # Linux: "4 received", macOS: "4 packets received"
+        packets_match = re.search(r"(\d+) packets transmitted, (\d+) (?:packets )?received", output)
         packets_sent = int(packets_match.group(1)) if packets_match else count
         packets_received = int(packets_match.group(2)) if packets_match else 0
 
         # --- Parse average latency ---
-        rtt_match = re.search(r"rtt min/avg/max/mdev = [\d.]+/([\d.]+)/[\d.]+/[\d.]+ ms", output)
+        # Linux: "rtt min/avg/max/mdev", macOS: "round-trip min/avg/max/stddev" (ping6: "std-dev")
+        rtt_match = re.search(r"(?:rtt|round-trip) min/avg/max/[\w-]+ = [\d.]+/([\d.]+)/", output)
         latency_ms = float(rtt_match.group(1)) if rtt_match else None
 
         reachable = packet_loss < 100.0
