@@ -1,6 +1,14 @@
 import re
+from api.config import LLM_REDACT
 from api.llm import llm_complete
 from api.logger import logger
+from api.redact import Redactor, redact_scan, redact_dns
+
+REDACTION_NOTE = (
+    "Note: real IP addresses and hostnames in the data have been replaced with placeholders "
+    "like IP_1 and HOST_1. Refer to them exactly as written and do not comment on the placeholders. "
+    "List each placeholder individually, never as a range (write \"IP_1, IP_2, IP_3\", not \"IP_1-IP_3\").\n\n"
+)
 
 
 # ---------------------------------------------------------------------------
@@ -285,22 +293,35 @@ Do not use bullet points. Do not use markdown. Do not use labels like "Recommend
 # ---------------------------------------------------------------------------
 
 async def analyze_scan(scan_result: dict, ping_result: dict = None) -> str:
+    host = scan_result["host"]
+    logger.info(f"Analyze requested: {host}")
+
+    redactor = Redactor()
+    if LLM_REDACT:
+        scan_result = redact_scan(redactor, scan_result)
     scan_result = {**scan_result, "host": sanitize_host(scan_result["host"])}
     prompt = build_prompt(scan_result, ping_result)
-    logger.info(f"Analyze requested: {scan_result['host']}")
+    if LLM_REDACT:
+        prompt = REDACTION_NOTE + redactor.text(prompt)
 
     raw = await llm_complete(prompt)
     result = re.sub(r'(?i)recommended action[:\s]*', '', raw).strip()
-    logger.info(f"Analyze complete: {scan_result['host']}")
-    return result
+    logger.info(f"Analyze complete: {host}")
+    return redactor.restore(result) if LLM_REDACT else result
 
 
 async def analyze_dns(dns_result: dict) -> str:
-    dns_result = {**dns_result, "target": sanitize_domain(dns_result["target"])}
-    prompt = build_dns_prompt(dns_result)
     target = dns_result["target"]
     logger.info(f"DNS analyze requested: {target}")
 
+    redactor = Redactor()
+    if LLM_REDACT:
+        dns_result = redact_dns(redactor, dns_result)
+    dns_result = {**dns_result, "target": sanitize_domain(dns_result["target"])}
+    prompt = build_dns_prompt(dns_result)
+    if LLM_REDACT:
+        prompt = REDACTION_NOTE + redactor.text(prompt)
+
     result = await llm_complete(prompt)
     logger.info(f"DNS analyze complete: {target}")
-    return result
+    return redactor.restore(result) if LLM_REDACT else result

@@ -99,6 +99,7 @@ Copy `.env.example` to `.env` and adjust values as needed.
 | LLM_API_KEY | (empty) | API key sent as a Bearer token. Not needed for local Ollama |
 | LLM_MODEL | (empty) | Model name, e.g. `openai/gpt-oss-120b` (Groq) or `llama3.2` (Ollama). Empty disables AI analysis |
 | LLM_TIMEOUT | 30 | Seconds to wait for the LLM |
+| LLM_REDACT | true | Replace every IP and hostname with placeholders (`IP_1`, `HOST_1`) before sending data to the LLM, and restore them in the reply. Set to `false` to send data unchanged |
 | SCAN_PORTS | 21,22,25,80,443,3306,3389,5432,6379,8080 | Ports scanned when a request sends an empty port list |
 | MAX_REQUEST_SIZE | 1024 | Max request body size in bytes |
 | ALLOW_PRIVATE_TARGETS | false | Allow private, loopback, link-local, CGNAT and other non-public IPs as targets |

@@ -8,6 +8,8 @@ LLM_BASE_URL = os.getenv("LLM_BASE_URL", "").strip()
 LLM_API_KEY = os.getenv("LLM_API_KEY", "").strip()
 LLM_MODEL = os.getenv("LLM_MODEL", "").strip()
 LLM_TIMEOUT = float(os.getenv("LLM_TIMEOUT", "30"))
+# Swap IPs and hostnames for placeholders before anything reaches the LLM
+LLM_REDACT = os.getenv("LLM_REDACT", "true").strip().lower() != "false"
 MAX_REQUEST_SIZE = int(os.getenv("MAX_REQUEST_SIZE", "1024"))
 
 SCAN_PORTS = [

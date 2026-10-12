@@ -45,7 +45,7 @@ From a hosted demo to an open-source tool you run locally. One step = one commit
   - `GET /api/config` returns `{llm_enabled, provider_host, model}`. Never the key.
   - Check: works with Groq and with local Ollama (`http://localhost:11434/v1`).
 
-- [ ] **5. Redaction**
+- [x] **5. Redaction**
   - New `api/redact.py`: swap private IPs and the scanned hostname for placeholders (`HOST_A`, `10.x.x.x → PRIVATE_IP_1`) and keep a map to restore them in the reply.
   - Setting `LLM_REDACT` (default `true`).
   - Check: a test proves no private IP or the original hostname appears in the outgoing prompt.
