@@ -19,6 +19,10 @@ def llm_enabled() -> bool:
     return bool(LLM_BASE_URL and LLM_MODEL)
 
 
+def model_name() -> str | None:
+    return LLM_MODEL or None
+
+
 def provider_host() -> str | None:
     return urlparse(LLM_BASE_URL).hostname if LLM_BASE_URL else None
 

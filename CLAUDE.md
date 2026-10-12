@@ -12,6 +12,7 @@ Goal: an open-source project people run locally. It is **not** hosted publicly.
 
 ## Rules
 - **Never run git.** Not even `git status` or `git diff`. The maintainer runs every git command. When a step is done, list the changed files and suggest a one-line commit message.
+- **Never move, copy, rename or edit `.env`.** To run without its values, override the variables in the command; python-dotenv never replaces a variable that's already set. Example: `LLM_BASE_URL= LLM_API_KEY= LLM_MODEL= pytest`. Numeric settings (`LLM_TIMEOUT`, `MAX_REQUEST_SIZE`, `SCAN_PORTS`) can't be empty, so give them a value instead.
 - **No AI attribution.** No `Co-Authored-By`, "Generated with" lines or similar in commits, code, comments or docs.
 - One roadmap step at a time. Stop after each step so it can be reviewed and committed.
 - Tick the step's box in `docs/ROADMAP.md` once its checks pass.
@@ -30,7 +31,7 @@ Goal: an open-source project people run locally. It is **not** hosted publicly.
 # backend (repo root)
 python -m venv venv && source venv/bin/activate
 pip install -r api/requirements.txt
-uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload
+uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload --no-proxy-headers
 pytest                      # after Phase 3 step 7
 
 # frontend

@@ -56,7 +56,11 @@ def redact_scan(r: Redactor, scan_result: dict) -> dict:
 
 def redact_dns(r: Redactor, dns_result: dict) -> dict:
     def records(key: str, field: str) -> list[dict]:
-        return [{**rec, field: r.value(rec[field])} for rec in dns_result.get(key, [])]
+        # A null MX label is not a hostname, so it is left as is
+        return [
+            rec if rec.get("null_mx") else {**rec, field: r.value(rec[field])}
+            for rec in dns_result.get(key, [])
+        ]
 
     redacted = {
         **dns_result,

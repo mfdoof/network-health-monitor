@@ -225,7 +225,7 @@ export default function DNSPage({ dnsResult, dnsHistory, onLookup, onAnalyze, an
                   {dnsResult.mx_records?.length > 0 ? (
                     dnsResult.mx_records.map((r, i) => (
                       <div key={i} className={styles.recordRow}>
-                        <span className={styles.priorityBadge}>{r.preference}</span>
+                        {!r.null_mx && <span className={styles.priorityBadge}>{r.preference}</span>}
                         <span className={styles.recordValue}>{r.host}</span>
                         <span className={styles.recordTtl}>TTL {r.ttl}</span>
                       </div>

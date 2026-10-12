@@ -57,7 +57,7 @@ From a hosted demo to an open-source tool you run locally. One step = one commit
 
 ## Phase 3: Open-source readiness
 
-- [ ] **7. Tests** (`pytest`, `tests/`)
+- [x] **7. Tests** (`pytest`, `tests/`)
   - Target validation, input models, redaction, and the LLM client with a mocked HTTP response (`respx` or `httpx.MockTransport`).
   - No real network calls in tests.
 

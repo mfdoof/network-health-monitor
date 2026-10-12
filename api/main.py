@@ -14,7 +14,7 @@ from api.logger import logger
 from api.scanner import scan_host
 from api.targets import check_target, TargetError, TargetNotAllowed
 from api.analyzer import analyze_scan, analyze_dns
-from api.llm import LLMError, llm_enabled, provider_host
+from api.llm import LLMError, llm_enabled, model_name, provider_host
 from api.ping import ping_host
 from api.dns_lookup import run_dns_lookup
 
@@ -209,11 +209,10 @@ async def analyze(host_id: str, request: Request):
 
 @router.get("/config")
 def get_config():
-    from api.config import LLM_MODEL
     return {
         "llm_enabled": llm_enabled(),
         "provider_host": provider_host(),
-        "model": LLM_MODEL or None,
+        "model": model_name(),
     }
 
 # --- DNS Routes ---

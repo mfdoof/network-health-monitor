@@ -13,11 +13,15 @@ import logging
 from typing import Any
 
 import dns.exception
+import dns.name
 import dns.rdatatype
 import dns.resolver
 import dns.reversename
 
 logger = logging.getLogger(__name__)
+
+# RFC 7505: a single MX of "." with preference 0 means the domain accepts no mail
+NULL_MX_LABEL = "no mail (null MX)"
 
 # Shared resolver — raise lifetime so slow upstreams don't instantly fail
 _resolver = dns.resolver.Resolver()
@@ -91,6 +95,14 @@ def _lookup_hostname(target: str) -> dict[str, Any]:
     answer = _query(target, "MX")
     if answer:
         for rdata in answer:
+            if rdata.exchange == dns.name.root:
+                result["mx_records"].append({
+                    "host": NULL_MX_LABEL,
+                    "preference": rdata.preference,
+                    "ttl": answer.rrset.ttl,
+                    "null_mx": True,
+                })
+                continue
             result["mx_records"].append({
                 "host": str(rdata.exchange).rstrip("."),
                 "preference": rdata.preference,

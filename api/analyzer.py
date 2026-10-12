@@ -253,7 +253,7 @@ Do not use bullet points. Do not use markdown. Do not use labels like "Recommend
     a_records = [r["address"] for r in dns_result.get("a_records", [])]
     aaaa_records = [r["address"] for r in dns_result.get("aaaa_records", [])]
     mx_records = [
-        f"{r['host']} (priority {r['preference']})"
+        r["host"] if r.get("null_mx") else f"{r['host']} (priority {r['preference']})"
         for r in dns_result.get("mx_records", [])
     ]
     ns_records = [r["nameserver"] for r in dns_result.get("ns_records", [])]
