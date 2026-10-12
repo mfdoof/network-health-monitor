@@ -65,6 +65,7 @@ Copy `.env.example` to `.env` and edit it. "Default" is the value used when a se
 | `LLM_REDACT` | `true` | `true` | Replace IPs and hostnames with placeholders (`IP_1`, `HOST_1`) before sending data to the LLM. Only `false` turns it off |
 | `WEB_BIND` | `127.0.0.1` | `127.0.0.1` | Docker Compose only: host address for the web container |
 | `WEB_PORT` | `8080` | `8080` | Docker Compose only: host port for the web container |
+| `TRUSTED_PROXY_IP` | empty | `127.0.0.1` | Docker Compose only: IP of a reverse proxy in front of the web container. Its `X-Forwarded-For` is trusted so each client gets its own rate limit. Empty means no proxy |
 
 ## LLM providers
 

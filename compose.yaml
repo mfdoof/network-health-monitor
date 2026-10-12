@@ -16,6 +16,8 @@ services:
 
   web:
     build: client
+    environment:
+      TRUSTED_PROXY_IP: "${TRUSTED_PROXY_IP:-127.0.0.1}"
     ports:
       - "${WEB_BIND:-127.0.0.1}:${WEB_PORT:-8080}:8080"
     depends_on:
